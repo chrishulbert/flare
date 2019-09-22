@@ -30,22 +30,31 @@ class Service {
     
     /// POST (eg insert) or PUT (eg update) to a backend endpoint. Completion is on the main thread.
     /// Token is your auth token, can only be nil for pre-login endpoints.
-    func post(url: URL, payload: Any, token: String?, timeoutInterval: TimeInterval? = nil, completion: @escaping (Result<([AnyHashable: Any], Data), Error>) -> ()) {
-        postOrPut(httpMethod: "POST", url: url, payload: payload, token: token, timeoutInterval: timeoutInterval, completion: completion)
+    func post(url: URL, payload: Any, headers: [String: String] = [:], token: String?, timeoutInterval: TimeInterval? = nil, completion: @escaping (Result<([AnyHashable: Any], Data), Error>) -> ()) {
+        postOrPut(httpMethod: "POST", url: url, payload: payload, headers: headers, token: token, timeoutInterval: timeoutInterval, completion: completion)
     }
-    func put(url: URL, payload: Any, token: String?, timeoutInterval: TimeInterval? = nil, completion: @escaping (Result<([AnyHashable: Any], Data), Error>) -> ()) {
-        postOrPut(httpMethod: "PUT", url: url, payload: payload, token: token, timeoutInterval: timeoutInterval, completion: completion)
+    func put(url: URL, payload: Any, headers: [String: String] = [:], token: String?, timeoutInterval: TimeInterval? = nil, completion: @escaping (Result<([AnyHashable: Any], Data), Error>) -> ()) {
+        postOrPut(httpMethod: "PUT", url: url, payload: payload, headers: headers, token: token, timeoutInterval: timeoutInterval, completion: completion)
     }
     
-    private func postOrPut(httpMethod: String, url: URL, payload: Any, token: String?, timeoutInterval: TimeInterval?, completion: @escaping (Result<([AnyHashable: Any], Data), Error>) -> ()) {
+    private func postOrPut(httpMethod: String, url: URL, payload: Any, headers: [String: String], token: String?, timeoutInterval: TimeInterval?, completion: @escaping (Result<([AnyHashable: Any], Data), Error>) -> ()) {
         guard let body = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
             completion(.failure(Errors.couldNotSerialiseJson))
             return
         }
         
+        var newHeaders = headers
+        newHeaders["Content-Type"] = "application/json"
+        
+        postOrPutRaw(httpMethod: httpMethod, url: url, body: body, headers: newHeaders, token: token, timeoutInterval: timeoutInterval, completion: completion)
+    }
+    
+    func postOrPutRaw(httpMethod: String, url: URL, body: Data, headers: [String: String], token: String?, timeoutInterval: TimeInterval? = nil, completion: @escaping (Result<([AnyHashable: Any], Data), Error>) -> ()) {
         var request = URLRequest.request(url: url, token: token, timeoutInterval: timeoutInterval)
         request.httpMethod = httpMethod
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        for (k, v) in headers {
+            request.setValue(v, forHTTPHeaderField: k)
+        }
         request.httpBody = body
         
         make(request: request, completion: completion)
@@ -69,7 +78,7 @@ class Service {
             }
             guard 200 <= response.statusCode && response.statusCode < 300 else {
                 // TODO try parse the body json, wrap into an error with 2 values for printability, should have eg {"code": "bad_request", "message": "Invalid bucketId: 967fa9f24082154465d30c12x"
-                completion(.failure(Errors.not200))
+                completion(.failure(Errors.not200(response.statusCode)))
                 return
             }
             guard let data = data else {
@@ -91,7 +100,7 @@ class Service {
         case couldNotSerialiseJson
         case notHTTPURLResponse
         case unauthorized401
-        case not200
+        case not200(Int)
         case missingResponseData
         case couldNotParseJson
         case notLoggedIn

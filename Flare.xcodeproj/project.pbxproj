@@ -12,6 +12,7 @@
 		839FBDC023277D6E0068E1F1 /* ListFileVersions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839FBDBF23277D6E0068E1F1 /* ListFileVersions.swift */; };
 		83E1B8A2231F5D4300C1150D /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E1B8A1231F5D4300C1150D /* Service.swift */; };
 		83E1B8A4231F5DC100C1150D /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E1B8A3231F5DC100C1150D /* Helpers.swift */; };
+		83E2D26423378F86005E8632 /* UploadFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E2D26323378F86005E8632 /* UploadFile.swift */; };
 		83E9EA2B231F5A4700AA965E /* AuthorizeAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E9EA2A231F5A4700AA965E /* AuthorizeAccount.swift */; };
 		83F27B54231CDA5F006ADDC9 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F27B53231CDA5F006ADDC9 /* main.swift */; };
 /* End PBXBuildFile section */
@@ -34,6 +35,7 @@
 		839FBDBF23277D6E0068E1F1 /* ListFileVersions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListFileVersions.swift; sourceTree = "<group>"; };
 		83E1B8A1231F5D4300C1150D /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
 		83E1B8A3231F5DC100C1150D /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
+		83E2D26323378F86005E8632 /* UploadFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadFile.swift; sourceTree = "<group>"; };
 		83E9EA2A231F5A4700AA965E /* AuthorizeAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizeAccount.swift; sourceTree = "<group>"; };
 		83F27B50231CDA5F006ADDC9 /* Flare */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Flare; sourceTree = BUILT_PRODUCTS_DIR; };
 		83F27B53231CDA5F006ADDC9 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -59,6 +61,7 @@
 				839FBDBF23277D6E0068E1F1 /* ListFileVersions.swift */,
 				836B352E2330B1EC00E4B0C2 /* HideFile.swift */,
 				83672EED233787DA00CAF32A /* GetUploadUrl.swift */,
+				83E2D26323378F86005E8632 /* UploadFile.swift */,
 			);
 			path = BackblazeB2;
 			sourceTree = "<group>";
@@ -115,7 +118,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1020;
-				LastUpgradeCheck = 1020;
+				LastUpgradeCheck = 1100;
 				ORGANIZATIONNAME = Splinter;
 				TargetAttributes = {
 					83F27B4F231CDA5F006ADDC9 = {
@@ -145,6 +148,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83E2D26423378F86005E8632 /* UploadFile.swift in Sources */,
 				83E1B8A2231F5D4300C1150D /* Service.swift in Sources */,
 				83F27B54231CDA5F006ADDC9 /* main.swift in Sources */,
 				839FBDC023277D6E0068E1F1 /* ListFileVersions.swift in Sources */,
@@ -276,6 +280,7 @@
 		83F27B58231CDA5F006ADDC9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -285,6 +290,7 @@
 		83F27B59231CDA5F006ADDC9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
