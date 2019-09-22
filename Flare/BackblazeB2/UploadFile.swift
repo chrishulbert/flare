@@ -16,7 +16,7 @@ import Foundation
 /// To achieve faster upload speeds, request multiple uploadUrls and upload your files to these different
 /// endpoints in parallel.
 enum UploadFile {
-    static func send(token: String, uploadUrl: URL, fileName: String, file: Data, lastModified: Date, completion: @escaping (Result<URL, Error>) -> ()) {
+    static func send(token: String, uploadUrl: URL, fileName: String, file: Data, lastModified: Date, completion: @escaping (Result<(), Error>) -> ()) {
         let percentName = fileName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         let headers: [String: String] = [
             "X-Bz-File-Name": percentName,
@@ -28,12 +28,8 @@ enum UploadFile {
         ]
         Service.shared.postOrPutRaw(httpMethod: "POST", url: uploadUrl, body: file, headers: headers, token: token, completion: { result in
             switch result {
-            case .success(let json, _):
-                guard let uploadUrl = (json["uploadUrl"] as? String)?.asUrl else {
-                    completion(.failure(Service.Errors.invalidResponse))
-                    return
-                }
-                completion(.success(uploadUrl))
+            case .success:
+                completion(.success(()))
                 
             case .failure(let error):
                 completion(.failure(error))
