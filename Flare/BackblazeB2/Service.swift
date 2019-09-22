@@ -1,0 +1,127 @@
+//
+//  Service.swift
+//  Flare
+//
+//  Created by Chris on 4/9/19.
+//  Copyright © 2019 Splinter. All rights reserved.
+//
+
+import Foundation
+
+class Service {
+    static let shared = Service()
+    
+    let session = URLSession(configuration: .ephemeral, delegate: nil, delegateQueue: .main)
+    
+    /// GETs an endpoint. Completion is main thread. Token is the auth token.
+    func get(url: URL, token: String?, queryItems: [URLQueryItem] = [], timeoutInterval: TimeInterval? = nil, completion: @escaping (Result<([AnyHashable: Any], Data), Error>) -> ()) {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+            completion(.failure(Errors.urlComponents))
+            return
+        }
+        components.queryItems = queryItems
+        guard let urlWithQuery = components.url else {
+            completion(.failure(Errors.urlComponents))
+            return
+        }
+        let request = URLRequest.request(url: urlWithQuery, token: token, timeoutInterval: timeoutInterval)
+        make(request: request, completion: completion)
+    }
+    
+    /// POST (eg insert) or PUT (eg update) to a backend endpoint. Completion is on the main thread.
+    /// Token is your auth token, can only be nil for pre-login endpoints.
+    func post(url: URL, payload: Any, token: String?, timeoutInterval: TimeInterval? = nil, completion: @escaping (Result<([AnyHashable: Any], Data), Error>) -> ()) {
+        postOrPut(httpMethod: "POST", url: url, payload: payload, token: token, timeoutInterval: timeoutInterval, completion: completion)
+    }
+    func put(url: URL, payload: Any, token: String?, timeoutInterval: TimeInterval? = nil, completion: @escaping (Result<([AnyHashable: Any], Data), Error>) -> ()) {
+        postOrPut(httpMethod: "PUT", url: url, payload: payload, token: token, timeoutInterval: timeoutInterval, completion: completion)
+    }
+    
+    private func postOrPut(httpMethod: String, url: URL, payload: Any, token: String?, timeoutInterval: TimeInterval?, completion: @escaping (Result<([AnyHashable: Any], Data), Error>) -> ()) {
+        guard let body = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
+            completion(.failure(Errors.couldNotSerialiseJson))
+            return
+        }
+        
+        var request = URLRequest.request(url: url, token: token, timeoutInterval: timeoutInterval)
+        request.httpMethod = httpMethod
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = body
+        
+        make(request: request, completion: completion)
+    }
+    
+    /// Helper for making get/post requests to the backend.
+    func make(request: URLRequest, completion: @escaping (Result<([AnyHashable: Any], Data), Error>) -> ()) {
+        session.dataTask(with: request, completionHandler: { data, response, error in
+            #if DEBUG
+            if let s = data?.asString {
+                print(s)
+            }
+            #endif
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            guard let response = response as? HTTPURLResponse else {
+                completion(.failure(Errors.notHTTPURLResponse))
+                return
+            }
+            guard 200 <= response.statusCode && response.statusCode < 300 else {
+                // TODO try parse the body json, wrap into an error with 2 values for printability, should have eg {"code": "bad_request", "message": "Invalid bucketId: 967fa9f24082154465d30c12x"
+                completion(.failure(Errors.not200))
+                return
+            }
+            guard let data = data else {
+                completion(.failure(Errors.missingResponseData))
+                return
+            }
+            guard let json = data.asJson else {
+                completion(.failure(Errors.couldNotParseJson))
+                return
+            }
+            
+            completion(.success((json, data)))
+        }).resume()
+    }
+    
+    enum Errors: Error {
+        case badApiUrl
+        case urlComponents
+        case couldNotSerialiseJson
+        case notHTTPURLResponse
+        case unauthorized401
+        case not200
+        case missingResponseData
+        case couldNotParseJson
+        case notLoggedIn
+        case invalidResponse
+    }
+    
+//    /// Helper that generates an endpoint url
+//    static func endpoint(component: String, version: Int = 1) -> URL {
+//        let path = "api/v\(version)/\(component)"
+//        return ConfigManager.shared.config.api.appendingPathComponent(path)
+//    }
+    
+}
+
+private extension Data {
+    var asJson: [AnyHashable: Any]? {
+        let json = try? JSONSerialization.jsonObject(with: self, options: [])
+        return json as? [AnyHashable: Any]
+    }
+}
+
+private extension URLRequest {
+    static func request(url: URL, token: String?, timeoutInterval: TimeInterval?) -> URLRequest {
+        var request = URLRequest(url: url)
+        if let token = token {
+            request.setValue(token, forHTTPHeaderField: "Authorization")
+        }
+        if let timeoutInterval = timeoutInterval {
+            request.timeoutInterval = timeoutInterval
+        }
+        return request
+    }
+}
