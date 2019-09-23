@@ -8,7 +8,7 @@
 
 import Foundation
 
-/// https://www.backblaze.com/b2/docs/b2_get_upload_url.html
+/// https://www.backblaze.com/b2/docs/b2_upload_file.html
 /// apiUrl is eg "https://apiNNN.backblazeb2.com"
 /// An uploadUrl and upload authorizationToken are valid for 24 hours or until the endpoint
 /// rejects an upload, see b2_upload_file.
@@ -24,8 +24,7 @@ enum UploadFile {
             "Content-Type": "b2/x-auto",
             "Content-Length": String(file.count),
             "X-Bz-Content-Sha1": file.asSha1.asHexString,
-            "X-Bz-Info-src_last_modified_millis": lastModified.asBzString
-            
+            "X-Bz-Info-src_last_modified_millis": lastModified.asBzString,
         ]
         Service.shared.postOrPutRaw(httpMethod: "POST", url: uploadUrl, body: file, headers: headers, token: token, completion: { result in
             switch result {
