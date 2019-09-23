@@ -26,7 +26,7 @@ enum UploadFileWrapped {
 enum UploadResult {
     case success
     case failure(Error)
-    case needNewUploadUrl // There was an issue with the backblaze pod you tried to use.
+    case needNewUploadUrl(Error) // There was an issue with the backblaze pod you tried to use.
 }
 
 extension UploadResult {
@@ -35,16 +35,16 @@ extension UploadResult {
     static func from(error: Error) -> UploadResult {
         let nse = error as NSError
         if nse.code == NSURLErrorCannotConnectToHost || nse.code == NSURLErrorTimedOut {
-            return .needNewUploadUrl
+            return .needNewUploadUrl(error)
         }
         switch error {
         case Service.Errors.not200(401, "expired_auth_token", _):
-            return .needNewUploadUrl
+            return .needNewUploadUrl(error)
         case Service.Errors.not200(408, _, _):
-            return .needNewUploadUrl
+            return .needNewUploadUrl(error)
         case Service.Errors.not200(let code, _, _):
             if 500 <= code && code <= 599 {
-                return .needNewUploadUrl
+                return .needNewUploadUrl(error)
             }
         default:
             break
