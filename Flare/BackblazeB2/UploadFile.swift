@@ -15,6 +15,7 @@ import Foundation
 /// You can upload as many files to this URL as you need.
 /// To achieve faster upload speeds, request multiple uploadUrls and upload your files to these different
 /// endpoints in parallel.
+/// You shouldn't use this directly, use UploadFileWrapped instead.
 enum UploadFile {
     static func send(token: String, uploadUrl: URL, fileName: String, file: Data, lastModified: Date, completion: @escaping (Result<(), Error>) -> ()) {
         let percentName = fileName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""

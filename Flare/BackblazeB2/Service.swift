@@ -77,8 +77,10 @@ class Service {
                 return
             }
             guard 200 <= response.statusCode && response.statusCode < 300 else {
-                // TODO try parse the body json, wrap into an error with 2 values for printability, should have eg {"code": "bad_request", "message": "Invalid bucketId: 967fa9f24082154465d30c12x"
-                completion(.failure(Errors.not200(response.statusCode)))
+                let json = data?.asJson
+                let code = json?["code"] as? String // eg "bad_request"
+                let message = json?["message"] as? String // eg "Invalid bucketId: 967fa9f24082154465d30c12x"
+                completion(.failure(Errors.not200(response.statusCode, code, message)))
                 return
             }
             guard let data = data else {
@@ -100,7 +102,7 @@ class Service {
         case couldNotSerialiseJson
         case notHTTPURLResponse
         case unauthorized401
-        case not200(Int)
+        case not200(Int, String?, String?) // HTTP code, code, message
         case missingResponseData
         case couldNotParseJson
         case notLoggedIn
