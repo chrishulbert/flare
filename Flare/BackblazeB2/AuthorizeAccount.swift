@@ -32,7 +32,7 @@ enum AuthorizeAccount {
 }
 
 struct AuthorizeAccountResponse {
-    let authorizationToken: String
+    let authorizationToken: String // This authorization token is valid for at most 24 hours.
     let accountId: String
     let apiUrl: String // Eg "https://apiNNN.backblazeb2.com"
     let downloadUrl: String // eg "https://f002.backblazeb2.com"

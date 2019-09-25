@@ -12,6 +12,7 @@
 		839FBDC023277D6E0068E1F1 /* ListFileVersions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839FBDBF23277D6E0068E1F1 /* ListFileVersions.swift */; };
 		83BFA0CD2338EEB900DF488C /* UploadFileWrapped.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BFA0CC2338EEB900DF488C /* UploadFileWrapped.swift */; };
 		83BFA0D12338F1FA00DF488C /* Uploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BFA0D02338F1FA00DF488C /* Uploader.swift */; };
+		83BFA0E4233B373B00DF488C /* SyncConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BFA0E3233B373B00DF488C /* SyncConfig.swift */; };
 		83E1B8A2231F5D4300C1150D /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E1B8A1231F5D4300C1150D /* Service.swift */; };
 		83E1B8A4231F5DC100C1150D /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E1B8A3231F5DC100C1150D /* Helpers.swift */; };
 		83E2D26423378F86005E8632 /* UploadFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E2D26323378F86005E8632 /* UploadFile.swift */; };
@@ -37,6 +38,7 @@
 		839FBDBF23277D6E0068E1F1 /* ListFileVersions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListFileVersions.swift; sourceTree = "<group>"; };
 		83BFA0CC2338EEB900DF488C /* UploadFileWrapped.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadFileWrapped.swift; sourceTree = "<group>"; };
 		83BFA0D02338F1FA00DF488C /* Uploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Uploader.swift; sourceTree = "<group>"; };
+		83BFA0E3233B373B00DF488C /* SyncConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncConfig.swift; sourceTree = "<group>"; };
 		83E1B8A1231F5D4300C1150D /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
 		83E1B8A3231F5DC100C1150D /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		83E2D26323378F86005E8632 /* UploadFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadFile.swift; sourceTree = "<group>"; };
@@ -93,6 +95,7 @@
 			children = (
 				83E9EA29231F59B400AA965E /* BackblazeB2 */,
 				83F27B53231CDA5F006ADDC9 /* main.swift */,
+				83BFA0E3233B373B00DF488C /* SyncConfig.swift */,
 			);
 			path = Flare;
 			sourceTree = "<group>";
@@ -161,6 +164,7 @@
 				839FBDC023277D6E0068E1F1 /* ListFileVersions.swift in Sources */,
 				836B352F2330B1EC00E4B0C2 /* HideFile.swift in Sources */,
 				83672EEE233787DA00CAF32A /* GetUploadUrl.swift in Sources */,
+				83BFA0E4233B373B00DF488C /* SyncConfig.swift in Sources */,
 				83BFA0D12338F1FA00DF488C /* Uploader.swift in Sources */,
 				83E9EA2B231F5A4700AA965E /* AuthorizeAccount.swift in Sources */,
 				83E1B8A4231F5DC100C1150D /* Helpers.swift in Sources */,

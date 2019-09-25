@@ -10,8 +10,8 @@ import Foundation
 
 /// This does an upload, and figures out if any error means 'retry another Backblaze pod' or 'legitimate error'.
 enum UploadFileWrapped {
-    static func send(token: String, uploadUrl: URL, fileName: String, file: Data, lastModified: Date, completion: @escaping (UploadResult) -> ()) {
-        UploadFile.send(token: token, uploadUrl: uploadUrl, fileName: fileName, file: file, lastModified: lastModified, completion: { result in
+    static func send(token: String, uploadParams: UploadParams, fileName: String, file: Data, lastModified: Date, completion: @escaping (UploadResult) -> ()) {
+        UploadFile.send(token: uploadParams.authorizationToken, uploadUrl: uploadParams.uploadUrl, fileName: fileName, file: file, lastModified: lastModified, completion: { result in
             switch result {
             case .success:
                 completion(.success)
