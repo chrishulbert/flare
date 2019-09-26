@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "CLibUV",
+        "repositoryURL": "https://github.com/chrishulbert/clibuv",
+        "state": {
+          "branch": "master",
+          "revision": "62eeb128076ed2a82242d7a5aa5451b8f9108514",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

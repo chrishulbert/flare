@@ -3,12 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		83672EEE233787DA00CAF32A /* GetUploadUrl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83672EED233787DA00CAF32A /* GetUploadUrl.swift */; };
 		836B352F2330B1EC00E4B0C2 /* HideFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836B352E2330B1EC00E4B0C2 /* HideFile.swift */; };
+		838810E1233CB65700C90D11 /* CLibUV in Frameworks */ = {isa = PBXBuildFile; productRef = 838810E0233CB65700C90D11 /* CLibUV */; };
 		839FBDC023277D6E0068E1F1 /* ListFileVersions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839FBDBF23277D6E0068E1F1 /* ListFileVersions.swift */; };
 		83BFA0CD2338EEB900DF488C /* UploadFileWrapped.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BFA0CC2338EEB900DF488C /* UploadFileWrapped.swift */; };
 		83BFA0D12338F1FA00DF488C /* Uploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BFA0D02338F1FA00DF488C /* Uploader.swift */; };
@@ -52,12 +53,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				838810E1233CB65700C90D11 /* CLibUV in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		838810DF233CB65700C90D11 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		83E9EA29231F59B400AA965E /* BackblazeB2 */ = {
 			isa = PBXGroup;
 			children = (
@@ -79,6 +88,7 @@
 			children = (
 				83F27B52231CDA5F006ADDC9 /* Flare */,
 				83F27B51231CDA5F006ADDC9 /* Products */,
+				838810DF233CB65700C90D11 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -116,6 +126,9 @@
 			dependencies = (
 			);
 			name = Flare;
+			packageProductDependencies = (
+				838810E0233CB65700C90D11 /* CLibUV */,
+			);
 			productName = Flare;
 			productReference = 83F27B50231CDA5F006ADDC9 /* Flare */;
 			productType = "com.apple.product-type.tool";
@@ -143,6 +156,9 @@
 				en,
 			);
 			mainGroup = 83F27B47231CDA5F006ADDC9;
+			packageReferences = (
+				83C75B12233B91E8008A3495 /* XCRemoteSwiftPackageReference "clibuv" */,
+			);
 			productRefGroup = 83F27B51231CDA5F006ADDC9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -331,6 +347,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		83C75B12233B91E8008A3495 /* XCRemoteSwiftPackageReference "clibuv" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/chrishulbert/clibuv";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		838810E0233CB65700C90D11 /* CLibUV */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 83C75B12233B91E8008A3495 /* XCRemoteSwiftPackageReference "clibuv" */;
+			productName = CLibUV;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 83F27B48231CDA5F006ADDC9 /* Project object */;
 }

@@ -20,6 +20,7 @@
 // Note that the bucket id isn't the same as the bucket name
 
 import Foundation
+import CLibUV
 
 let demoFileName = "Demo.txt"
 let demoData = "Lorem ipsum".data(using: .utf8)!
