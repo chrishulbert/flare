@@ -18,6 +18,8 @@
 //    }
 // Generate a key for the above with this: ruby -e "require 'securerandom'; require 'base64'; puts(Base64.encode64(SecureRandom.random_bytes(32)))"
 // Note that the bucket id isn't the same as the bucket name
+// Libuv: https://github.com/Trevi-Swift/swift-libuv
+// Libuv: http://docs.libuv.org/en/v1.x/guide/filesystem.html#file-change-events
 
 import Foundation
 import CLibUV
@@ -38,7 +40,7 @@ AuthorizeAccount.send(accountId: config.accountId, applicationKey: config.applic
                     switch result {
                     case .success(let uploadParams):
                         print("Uploaded!")
-                        exit(EXIT_SUCCESS)
+//                        exit(EXIT_SUCCESS)
 
                         
                     case .failure(let error):
@@ -94,5 +96,15 @@ AuthorizeAccount.send(accountId: config.accountId, applicationKey: config.applic
         exit(EXIT_FAILURE)
     }
 })
+
+let witness = Witness(paths: [config.folder], flags: [.FileEvents, .IgnoreSelf], latency: 1) { events in
+    // If a file is renamed, you get a 'renamed' event for both the old and new name.
+    // TODO ignore .DS_Store
+    print("file system events received:")
+    for event in events {
+        print(event)
+    }
+    print("---")
+}
 
 RunLoop.main.run()
