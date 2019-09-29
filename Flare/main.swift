@@ -107,4 +107,33 @@ let witness = Witness(paths: [config.folder], flags: [.FileEvents, .IgnoreSelf],
     print("---")
 }
 
+class Foo: AsyncOperation {
+    override func asyncStart() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+            print("...almost there...")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                print("...done!...")
+                self.asyncFinish()
+            })
+        })
+    }
+}
+
+class Bar: AsyncOperation {
+    override func asyncStart() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+            print("...bar a...")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                print("...bar done!...")
+                self.asyncFinish()
+            })
+        })
+    }
+}
+let success = BlockOperation(block: {
+    exit(EXIT_SUCCESS)
+})
+
+SyncManager.shared.queue.addOperations([Foo(), Foo(), Bar(), success], waitUntilFinished: false)
+
 RunLoop.main.run()
