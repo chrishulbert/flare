@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8354FD6E2344B04900CF9A6A /* PromiseOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8354FD6D2344B04900CF9A6A /* PromiseOperation.swift */; };
 		83672EEE233787DA00CAF32A /* GetUploadUrl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83672EED233787DA00CAF32A /* GetUploadUrl.swift */; };
 		836B352F2330B1EC00E4B0C2 /* HideFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836B352E2330B1EC00E4B0C2 /* HideFile.swift */; };
 		838810E1233CB65700C90D11 /* CLibUV in Frameworks */ = {isa = PBXBuildFile; productRef = 838810E0233CB65700C90D11 /* CLibUV */; };
@@ -40,6 +41,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8354FD6D2344B04900CF9A6A /* PromiseOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromiseOperation.swift; sourceTree = "<group>"; };
 		83672EED233787DA00CAF32A /* GetUploadUrl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetUploadUrl.swift; sourceTree = "<group>"; };
 		836B352E2330B1EC00E4B0C2 /* HideFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HideFile.swift; sourceTree = "<group>"; };
 		838810E3233EDD1D00C90D11 /* Watcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Watcher.swift; sourceTree = "<group>"; };
@@ -104,6 +106,7 @@
 			children = (
 				83D74CE02340CE890053EC72 /* SyncManager.swift */,
 				83D74CE22340D6570053EC72 /* AsyncOperation.swift */,
+				8354FD6D2344B04900CF9A6A /* PromiseOperation.swift */,
 			);
 			path = Sync;
 			sourceTree = "<group>";
@@ -225,6 +228,7 @@
 				839FBDC023277D6E0068E1F1 /* ListFileVersions.swift in Sources */,
 				836B352F2330B1EC00E4B0C2 /* HideFile.swift in Sources */,
 				838810E4233EDD1D00C90D11 /* Watcher.swift in Sources */,
+				8354FD6E2344B04900CF9A6A /* PromiseOperation.swift in Sources */,
 				83672EEE233787DA00CAF32A /* GetUploadUrl.swift in Sources */,
 				839295AC233EEEF900C9A295 /* EventStream.swift in Sources */,
 				83BFA0E4233B373B00DF488C /* SyncConfig.swift in Sources */,

@@ -130,10 +130,23 @@ class Bar: AsyncOperation {
         })
     }
 }
+
+let promise = PromiseOperation { completion in
+    print("...promise 1/3...")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+        print("...promise 2/3...")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+            print("...promise 3/3 done!...")
+            completion()
+        })
+    })
+
+}
+
 let success = BlockOperation(block: {
     exit(EXIT_SUCCESS)
 })
 
-SyncManager.shared.queue.addOperations([Foo(), Foo(), Bar(), success], waitUntilFinished: false)
+SyncManager.shared.queue.addOperations([Foo(), Foo(), Bar(), promise, success], waitUntilFinished: false)
 
 RunLoop.main.run()
