@@ -18,4 +18,19 @@ class SyncManager {
         q.name = "SyncManager"
         return q
     }()
+    
+    /// This is exposed so other ops can add themselves as dependencies of this.
+    let finalOperation = BlockOperation(block: {
+        print("Success!")
+        exit(EXIT_SUCCESS)
+    })
+    
+    /// Enqueue the operations necessary to get started.
+    func enqueueStart() {
+        queue.addOperations([
+            BzAuthorizeOperation(syncContext: syncContext),
+            FolderSyncOperation(syncContext: syncContext, path: nil),
+            finalOperation,
+        ], waitUntilFinished: false)
+    }
 }

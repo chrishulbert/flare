@@ -143,14 +143,5 @@ let promise = PromiseOperation { completion in
 
 }
 
-let success = BlockOperation(block: {
-    print("Success!")
-    exit(EXIT_SUCCESS)
-})
-
-SyncManager.shared.queue.addOperations([
-    BzAuthorizeOperation(syncContext: syncContext),
-    success
-], waitUntilFinished: false)
-
+SyncManager.shared.enqueueStart()
 RunLoop.main.run()
