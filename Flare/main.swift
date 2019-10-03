@@ -22,38 +22,38 @@
 // Libuv: http://docs.libuv.org/en/v1.x/guide/filesystem.html#file-change-events
 
 import Foundation
-import CLibUV
+//import CLibUV
 
-let demoFileName = "Demo.txt"
-let demoData = "Lorem ipsum".data(using: .utf8)!
-let demoLastModified = Date()
+//let demoFileName = "Demo.txt"
+//let demoData = "Lorem ipsum".data(using: .utf8)!
+//let demoLastModified = Date()
 
-let config = SyncConfig.load()
-
-AuthorizeAccount.send(accountId: config.accountId, applicationKey: config.applicationKey, completion: { result in
-    switch result {
-    case .success(let response):
-        GetUploadUrl.send(token: response.authorizationToken, apiUrl: response.apiUrl, bucketId: config.bucketId, completion: { result in
-            switch result {
-            case .success(let uploadParams):
-                Uploader.send(token: response.authorizationToken, apiUrl: response.apiUrl, bucketId: config.bucketId, uploadParams: uploadParams, fileName: demoFileName, file: demoData, lastModified: demoLastModified, completion: { result in
-                    switch result {
-                    case .success(let uploadParams):
-                        print("Uploaded!")
-//                        exit(EXIT_SUCCESS)
-
-                        
-                    case .failure(let error):
-                        print(error)
-                        exit(EXIT_FAILURE)
-                    }
-                })
-                
-            case .failure(let error):
-                print(error)
-                exit(EXIT_FAILURE)
-            }
-        })
+let syncContext = SyncContext()
+//
+//AuthorizeAccount.send(accountId: config.accountId, applicationKey: config.applicationKey, completion: { result in
+//    switch result {
+//    case .success(let response):
+//        GetUploadUrl.send(token: response.authorizationToken, apiUrl: response.apiUrl, bucketId: config.bucketId, completion: { result in
+//            switch result {
+//            case .success(let uploadParams):
+//                Uploader.send(token: response.authorizationToken, apiUrl: response.apiUrl, bucketId: config.bucketId, uploadParams: uploadParams, fileName: demoFileName, file: demoData, lastModified: demoLastModified, completion: { result in
+//                    switch result {
+//                    case .success(let uploadParams):
+//                        print("Uploaded!")
+////                        exit(EXIT_SUCCESS)
+//
+//
+//                    case .failure(let error):
+//                        print(error)
+//                        exit(EXIT_FAILURE)
+//                    }
+//                })
+//
+//            case .failure(let error):
+//                print(error)
+//                exit(EXIT_FAILURE)
+//            }
+//        })
                 
 //        HideFile.send(token: response.authorizationToken, apiUrl: response.apiUrl, bucketId: config.bucketId, fileName: "Icon120.png", completion: { result in
 //            switch result {
@@ -91,21 +91,21 @@ AuthorizeAccount.send(accountId: config.accountId, applicationKey: config.applic
 //            }
 //        })
         
-    case .failure(let error):
-        print(error)
-        exit(EXIT_FAILURE)
-    }
-})
+//    case .failure(let error):
+//        print(error)
+//        exit(EXIT_FAILURE)
+//    }
+//})
 
-let witness = Witness(paths: [config.folder], flags: [.FileEvents, .IgnoreSelf], latency: 1) { events in
-    // If a file is renamed, you get a 'renamed' event for both the old and new name.
-    // TODO ignore .DS_Store
-    print("file system events received:")
-    for event in events {
-        print(event)
-    }
-    print("---")
-}
+//let witness = Witness(paths: [config.folder], flags: [.FileEvents, .IgnoreSelf], latency: 1) { events in
+//    // If a file is renamed, you get a 'renamed' event for both the old and new name.
+//    // TODO ignore .DS_Store
+//    print("file system events received:")
+//    for event in events {
+//        print(event)
+//    }
+//    print("---")
+//}
 
 class Foo: AsyncOperation {
     override func asyncStart() {
@@ -144,9 +144,13 @@ let promise = PromiseOperation { completion in
 }
 
 let success = BlockOperation(block: {
+    print("Success!")
     exit(EXIT_SUCCESS)
 })
 
-SyncManager.shared.queue.addOperations([Foo(), Foo(), Bar(), promise, success], waitUntilFinished: false)
+SyncManager.shared.queue.addOperations([
+    BzAuthorizeOperation(syncContext: syncContext),
+    success
+], waitUntilFinished: false)
 
 RunLoop.main.run()
