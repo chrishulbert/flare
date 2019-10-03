@@ -25,34 +25,37 @@ class FolderSyncOperation: AsyncOperation {
         }
         
         ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: path, delimiter: "/", completion: { [weak self] result in
-            guard let sself = self else { return }
-            
             switch result {
             case .success(let files):
-                for file in files {
-                    guard let action = file.actionEnum else { continue }
-                    switch action {
-                    case .start:
-                        // In progress, so don't touch anything - this file can be taken care of next time the sync runs.
-                        print("Ignoring \(file.fileName) because it's an in-progress upload")
-                        
-                    case .upload:
-                        <#code#>
-                        
-                    case .hide:
-                        <#code#>
-                        
-                    case .folder: // Queue subfolders.
-                        let op = FolderSyncOperation(syncContext: sself.syncContext, path: file.fileName)
-                        SyncManager.shared.finalOperation.addDependency(op) // Ensure my new op runs before the 'final' one.
-                        SyncManager.shared.queue.addOperation(op)
-                    }
-                }
+                self?.handle(files: files)
                 
             case .failure(let error):
                 print("FolderSyncOperation > ListAllFileVersions error: \(error)")
                 exit(EXIT_FAILURE)
             }
         })
+    }
+    
+    /// Handle the returned files listing
+    func handle(files: [ListFileVersionsFile]) {
+        for file in files {
+            guard let action = file.actionEnum else { continue }
+            switch action {
+            case .start:
+                // In progress, so don't touch anything - this file can be taken care of next time the sync runs.
+                print("Ignoring \(file.fileName) because it's an in-progress upload")
+                
+            case .upload:
+                <#code#>
+                
+            case .hide:
+                <#code#>
+                
+            case .folder: // Queue syncing subfolders.
+                let op = FolderSyncOperation(syncContext: syncContext, path: file.fileName)
+                SyncManager.shared.finalOperation.addDependency(op) // Ensure my new op runs before the 'final' one.
+                SyncManager.shared.queue.addOperation(op)
+            }
+        }
     }
 }

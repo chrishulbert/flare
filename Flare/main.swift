@@ -7,6 +7,10 @@
 //
 
 // Notes:
+// * Unlike dropbox which always consumes ram / cpu, have this scheduled to run hourly *and then quit*.
+// * 2500 free requests / day, so 8hrs/day of use, gives you 300 folders.
+// * One day make a version that listens for updates and sends immediately.
+// * Or maybe just have a mini-app that watches, and if you touch anything, it debounces and spawns this to push up 1min after things slow down, and then quits again, as well as the hourly sync to pull down new stuff. Plus a menu option to 'sync now' if someone else has pushed.
 // Set bz bucket policy to 'Keep only the last version of the file' (does that keep the 'hidden' record/file/version?)
 // Make a config file like so: nano ~/.flare
 //    {
