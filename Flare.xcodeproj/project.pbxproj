@@ -13,6 +13,7 @@
 		8379F30F234606ED004717F3 /* FolderSyncOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F30E234606ED004717F3 /* FolderSyncOperation.swift */; };
 		8379F31123460905004717F3 /* BzAuthorizeOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F31023460905004717F3 /* BzAuthorizeOperation.swift */; };
 		8379F31323460994004717F3 /* SyncContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F31223460994004717F3 /* SyncContext.swift */; };
+		8379F3152346148B004717F3 /* ListAllFileVersions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F3142346148B004717F3 /* ListAllFileVersions.swift */; };
 		838810E1233CB65700C90D11 /* CLibUV in Frameworks */ = {isa = PBXBuildFile; productRef = 838810E0233CB65700C90D11 /* CLibUV */; };
 		838810E4233EDD1D00C90D11 /* Watcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838810E3233EDD1D00C90D11 /* Watcher.swift */; };
 		839295AB233EEEF900C9A295 /* FileEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839295A7233EEEF900C9A295 /* FileEvent.swift */; };
@@ -50,6 +51,7 @@
 		8379F30E234606ED004717F3 /* FolderSyncOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderSyncOperation.swift; sourceTree = "<group>"; };
 		8379F31023460905004717F3 /* BzAuthorizeOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BzAuthorizeOperation.swift; sourceTree = "<group>"; };
 		8379F31223460994004717F3 /* SyncContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncContext.swift; sourceTree = "<group>"; };
+		8379F3142346148B004717F3 /* ListAllFileVersions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListAllFileVersions.swift; sourceTree = "<group>"; };
 		838810E3233EDD1D00C90D11 /* Watcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Watcher.swift; sourceTree = "<group>"; };
 		839295A7233EEEF900C9A295 /* FileEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileEvent.swift; sourceTree = "<group>"; };
 		839295A8233EEEF900C9A295 /* EventStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventStream.swift; sourceTree = "<group>"; };
@@ -127,6 +129,7 @@
 				83E1B8A1231F5D4300C1150D /* Service.swift */,
 				83E1B8A3231F5DC100C1150D /* Helpers.swift */,
 				839FBDBF23277D6E0068E1F1 /* ListFileVersions.swift */,
+				8379F3142346148B004717F3 /* ListAllFileVersions.swift */,
 				836B352E2330B1EC00E4B0C2 /* HideFile.swift */,
 				83672EED233787DA00CAF32A /* GetUploadUrl.swift */,
 				83E2D26323378F86005E8632 /* UploadFile.swift */,
@@ -235,6 +238,7 @@
 				83BFA0CD2338EEB900DF488C /* UploadFileWrapped.swift in Sources */,
 				83F27B54231CDA5F006ADDC9 /* main.swift in Sources */,
 				83D74CE12340CE890053EC72 /* SyncManager.swift in Sources */,
+				8379F3152346148B004717F3 /* ListAllFileVersions.swift in Sources */,
 				839FBDC023277D6E0068E1F1 /* ListFileVersions.swift in Sources */,
 				836B352F2330B1EC00E4B0C2 /* HideFile.swift in Sources */,
 				838810E4233EDD1D00C90D11 /* Watcher.swift in Sources */,
