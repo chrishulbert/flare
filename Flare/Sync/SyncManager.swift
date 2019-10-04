@@ -14,7 +14,7 @@ class SyncManager {
     
     let queue: OperationQueue = {
         let q = OperationQueue()
-        q.maxConcurrentOperationCount = 1
+        q.maxConcurrentOperationCount = 1 // TODO bump this up to 1 per cpu, and add the appropriate dependencies between ops? Or would that suck for the upload pod reuse?
         q.name = "SyncManager"
         return q
     }()
