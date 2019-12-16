@@ -13,7 +13,7 @@ struct SyncConfig {
     let accountId: String
     let applicationKey: String
     let bucketId: String
-    let folder: String
+    let folder: String // Eg "/Users/sam/Flare" - no trailing slash.
 }
 
 extension SyncConfig {

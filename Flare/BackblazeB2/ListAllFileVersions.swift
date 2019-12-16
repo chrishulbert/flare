@@ -9,6 +9,7 @@
 import Foundation
 
 /// This wraps ListFileVersions so that it fetches all the files, even if there are >1000 and it needs to iterate.
+/// Use a trailing slash for 'prefix' if you want a subfolder.
 enum ListAllFileVersions {
     static func send(token: String, apiUrl: String, bucketId: String, prefix: String?, delimiter: String?,
                      startFileName: String? = nil, startFileId: String? = nil, filesSoFar: [ListFileVersionsFile] = [],

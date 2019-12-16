@@ -14,7 +14,7 @@ import Foundation
 /// apiUrl is eg "https://apiNNN.backblazeb2.com"
 /// delimiter is usually '/' -> https://www.backblaze.com/b2/docs/b2_list_file_names.html
 /// To get the root folder (no subfolders' files), specify delimiter=/ only.
-/// To get a subfolder, do delimiter=/ prefix=foo/bar/
+/// To get a subfolder, do delimiter=/ prefix=foo/bar/ (use a trailing slash).
 /// If you upload then hide: First record is action:hide, second is action:upload
 /// Hide record uploadTimestamp": 1568850170000 is the time of hiding.
 /// Folders are returned with names like 'photos/cats/'
