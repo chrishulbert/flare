@@ -69,11 +69,8 @@ class FolderSyncOperation: AsyncOperation {
         // Next collect a list of 'local' state.
         // Contents of directory doesn't return '._*' files eg ds store
         // TODO make it skip files that can't be accessed locally eg they're being saved or something, deal with them next time?
-        let contentsRaw = try? FileManager.default.contentsOfDirectory(at: pathUrl,
-                                                                       includingPropertiesForKeys: [URLResourceKey.isDirectoryKey, .contentModificationDateKey],
-                                                                       options: .skipsHiddenFiles)
+        let contentsRaw = try? myContents(ofDirectory: pathUrl)
         guard let contents = contentsRaw else {
-            // TODO handle this gracefully eg there's no such local folder, which is fine, needs to be synced down.
             print("Could not read contents of \(pathUrl)")
             exit(EXIT_FAILURE)
         }
@@ -174,5 +171,20 @@ extension String {
     func deleting(prefix: String) -> String {
         guard self.hasPrefix(prefix) else { return self }
         return String(self.dropFirst(prefix.count))
+    }
+}
+
+/// Gets the contents of a dir, gracefully returning [] if the dir doesn't exist, thus needs to be synced down.
+fileprivate func myContents(ofDirectory: URL) throws -> [URL] {
+    do {
+        return try FileManager.default.contentsOfDirectory(at: ofDirectory,
+            includingPropertiesForKeys: [URLResourceKey.isDirectoryKey, .contentModificationDateKey],
+            options: .skipsHiddenFiles)
+    } catch (let error as NSError) {
+        if error.code == 260 { // No such directory, which is fine, just needs to be synced down.
+            return []
+        } else {
+            throw error // Unknown error we shouldn't ignore.
+        }
     }
 }
