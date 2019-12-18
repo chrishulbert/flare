@@ -99,26 +99,43 @@ class Service {
     // TODO use this everywhere instead of async, for ease of integration with 'throws' and no more complicated NSOperations.
     // TODO need to change the response queue from .main
     // Blocks the current thread.
-    func makeSync(request: URLRequest) throws -> (Data?, URLResponse?, Error?) {
+    func makeSync(request: URLRequest) -> (Data?, URLResponse?, Error?) {
         var data: Data?
         var response: URLResponse?
         var error: Error?
         let semaphore = DispatchSemaphore(value: 0)
-
         session.dataTask(with: request, completionHandler: { newData, newResponse, newError in
             data = newData
             response = newResponse
             error = newError
             semaphore.signal()
         }).resume()
-
-        let timeoutResult = semaphore.wait(timeout: .distantFuture)
-        switch timeoutResult {
-        case .success:
-            return (data, response, error)
-        case .timedOut:
-            throw Errors.timedOut
+        _ = semaphore.wait(timeout: .distantFuture)
+        return (data, response, error)
+    }
+    
+    // TODO rename this neatly?
+    func makeSyncExtended(request: URLRequest) throws -> [AnyHashable: Any] {
+        let (dataO, responseO, error) = makeSync(request: request)
+        if let error = error {
+            throw error
         }
+        guard let response = responseO as? HTTPURLResponse else {
+            throw Errors.notHTTPURLResponse
+        }
+        guard 200 <= response.statusCode && response.statusCode < 300 else {
+            let json = dataO?.asJson
+            let code = json?["code"] as? String // eg "bad_request"
+            let message = json?["message"] as? String // eg "Invalid bucketId: 967fa9f24082154465d30c12x"
+            throw Errors.not200(response.statusCode, code, message)
+        }
+        guard let data = dataO else {
+            throw Errors.missingResponseData
+        }
+        guard let json = data.asJson else {
+            throw Errors.couldNotParseJson
+        }
+        return json
     }
     
     enum Errors: Error {
