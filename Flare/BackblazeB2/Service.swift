@@ -96,27 +96,9 @@ class Service {
         }).resume()
     }
     
-    // TODO use this everywhere instead of async, for ease of integration with 'throws' and no more complicated NSOperations.
-    // TODO need to change the response queue from .main
-    // Blocks the current thread.
-    func makeSync(request: URLRequest) -> (Data?, URLResponse?, Error?) {
-        var data: Data?
-        var response: URLResponse?
-        var error: Error?
-        let semaphore = DispatchSemaphore(value: 0)
-        session.dataTask(with: request, completionHandler: { newData, newResponse, newError in
-            data = newData
-            response = newResponse
-            error = newError
-            semaphore.signal()
-        }).resume()
-        _ = semaphore.wait(timeout: .distantFuture)
-        return (data, response, error)
-    }
-    
     // TODO rename this neatly?
     func makeSyncExtended(request: URLRequest) throws -> [AnyHashable: Any] {
-        let (dataO, responseO, error) = makeSync(request: request)
+        let (dataO, responseO, error) = session.dataTaskSync(request: request)
         if let error = error {
             throw error
         }
@@ -158,6 +140,26 @@ class Service {
 //        return ConfigManager.shared.config.api.appendingPathComponent(path)
 //    }
     
+}
+
+private extension URLSession {
+    // TODO use this everywhere instead of async, for ease of integration with 'throws' and no more complicated NSOperations.
+    // TODO need to change the response queue from .main
+    // Blocks the current thread.
+    func dataTaskSync(request: URLRequest) -> (Data?, URLResponse?, Error?) {
+        var data: Data?
+        var response: URLResponse?
+        var error: Error?
+        let semaphore = DispatchSemaphore(value: 0)
+        dataTask(with: request, completionHandler: { newData, newResponse, newError in
+            data = newData
+            response = newResponse
+            error = newError
+            semaphore.signal()
+        }).resume()
+        _ = semaphore.wait(timeout: .distantFuture) // Can safely ignore the return, because it cannot timeout with distantFuture.
+        return (data, response, error)
+    }
 }
 
 private extension Data {
