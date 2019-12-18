@@ -100,37 +100,84 @@ class FolderSyncOperation: AsyncOperation {
             // TODO Maybe upon local deletion, we 'hide' remotely but don't even do a full sync or anything.
             // TODO Or maybe on local deletion, create a .deleted.XFILENAME file which this'll then pick up and remove once synced.
         }
-        
+                
         // Queue subfolders.
         for subfolder in subfolders {
             print("Subfolder: \(subfolder)")
+            // TODO compare dates of subfolders, only run a reconciliation if different.
             let op = FolderSyncOperation(syncContext: syncContext, path: subfolder)
             SyncManager.shared.finalOperation.addDependency(op) // Ensure my new op runs before the 'final' one.
             SyncManager.shared.queue.addOperation(op)
         }
 
         // Finally reconcile.
-        let localFilesSet: Set<String> = Set(localStates.keys) // Turn these into sets for scalable comparisons.
-        let remoteFilesSet: Set<String> = Set(remoteStates.keys)
-        let remotesPlusLocals: Set<String> = localFilesSet.union(remoteFilesSet)
-        for file in remotesPlusLocals {
-            print("Reconcile >\(file)<")
-            let inLocal = localFilesSet.contains(file)
-            let inRemote = remoteFilesSet.contains(file)
-            if inLocal && inRemote {
-                // TODO compare dates, or maybe one will be 'deleted' or whatever.
-                // TODO deleted gets lower priority.
-                // TODO compare hashes if dates are different? Same hash means touch the dates to match?
-                print(" in both")
-            } else if inLocal && !inRemote {
-                // Compare if one is deleted or inserted or whatever.
-                print(" in only local")
-            } else if !inLocal && inRemote {
-                // Compare if one is deleted or inserted or whatever.
-                print(" in only remote")
+        var actions: [SyncAction] = []
+        let remotePlusLocalFiles: Set<String> = Set(localStates.keys).union(remoteStates.keys)
+        let oneMonthAgo = Date().addingTimeInterval(-30*24*60*60)
+        for file in remotePlusLocalFiles {
+            let localState = localStates[file] ?? .missing
+            let remoteState = remoteStates[file] ?? .missing
+            switch (localState, remoteState) {
+            case (.exists(let localDate), .exists(let remoteDate)):
+                if abs(localDate.timeIntervalSince(remoteDate)) < 1 {
+                    // Nothing to do, the dates are the same.
+                    // TODO Perhaps consider comparing file hashes?
+                } else if localDate > remoteDate {
+                    actions.append(.upload(file))
+                } else {
+                    actions.append(.download(file))
+                }
+                
+            case (.exists(let localDate), .deleted(let remoteDate)):
+                if localDate > remoteDate {
+                    actions.append(.upload(file))
+                } else {
+                    actions.append(.deleteLocal(file))
+                }
+
+            case (.exists, .missing):
+                actions.append(.upload(file))
+                
+            case (.deleted(let localDate), .exists(let remoteDate)):
+                if localDate > remoteDate {
+                    actions.append(.deleteRemote(file))
+                } else {
+                    actions.append(.download(file))
+                }
+                
+            case (.deleted(let localDate), .deleted(let remoteDate)):
+                // Tidy up metadata so subsequent syncs are faster.
+                // Removing metadata is safe, because 'deletes' only happen if both sides have metadata.
+                if localDate < oneMonthAgo {
+                    actions.append(.clearLocalDeletedMetadata(file))
+                }
+                if remoteDate < oneMonthAgo {
+                    actions.append(.clearRemoteDeletedMetadata(file))
+                }
+                
+            case (.deleted(let localDate), .missing):
+                if localDate < oneMonthAgo {
+                    actions.append(.clearLocalDeletedMetadata(file))
+                }
+                
+            case (.missing, .exists):
+                actions.append(.download(file))
+                
+            case (.missing, .deleted(let remoteDate)):
+                if remoteDate < oneMonthAgo {
+                    actions.append(.clearRemoteDeletedMetadata(file))
+                }
+
+            case (.missing, .missing):
+                break // Shouldn't be possible.
             }
-            print(" /reconcile")
         }
+        
+        print("Actions:")
+        print(actions)
+        print(" /actions")
+        
+        // TODO when doing the actions, do the smallest files first for speed.
         
         asyncFinish()
     }
@@ -148,6 +195,7 @@ class FolderSyncOperation: AsyncOperation {
 enum SyncFileState {
     case exists(Date)
     case deleted(Date)
+    case missing
 }
 
 extension ListFileVersionsFile {
@@ -187,4 +235,13 @@ fileprivate func myContents(ofDirectory: URL) throws -> [URL] {
             throw error // Unknown error we shouldn't ignore.
         }
     }
+}
+
+enum SyncAction {
+    case upload(String)
+    case download(String)
+    case deleteLocal(String)
+    case deleteRemote(String)
+    case clearLocalDeletedMetadata(String)
+    case clearRemoteDeletedMetadata(String)
 }
