@@ -96,6 +96,31 @@ class Service {
         }).resume()
     }
     
+    // TODO use this everywhere instead of async, for ease of integration with 'throws' and no more complicated NSOperations.
+    // TODO need to change the response queue from .main
+    // Blocks the current thread.
+    func makeSync(request: URLRequest) throws -> (Data?, URLResponse?, Error?) {
+        var data: Data?
+        var response: URLResponse?
+        var error: Error?
+        let semaphore = DispatchSemaphore(value: 0)
+
+        session.dataTask(with: request, completionHandler: { newData, newResponse, newError in
+            data = newData
+            response = newResponse
+            error = newError
+            semaphore.signal()
+        }).resume()
+
+        let timeoutResult = semaphore.wait(timeout: .distantFuture)
+        switch timeoutResult {
+        case .success:
+            return (data, response, error)
+        case .timedOut:
+            throw Errors.timedOut
+        }
+    }
+    
     enum Errors: Error {
         case badApiUrl
         case urlComponents
@@ -107,6 +132,7 @@ class Service {
         case couldNotParseJson
         case notLoggedIn
         case invalidResponse
+        case timedOut
     }
     
 //    /// Helper that generates an endpoint url
