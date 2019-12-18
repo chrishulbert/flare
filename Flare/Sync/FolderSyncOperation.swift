@@ -36,7 +36,7 @@ class FolderSyncOperation: AsyncOperation {
             }
         })
     }
-    
+
     /// Handle the returned files listing
     func handle(files: [ListFileVersionsFile]) {
         // Firstly collect a list of the 'remote' state.
@@ -53,7 +53,7 @@ class FolderSyncOperation: AsyncOperation {
             case .upload:
                 // Skip if we have already encountered this file, because the first version record is the most recent one.
                 guard !remoteStates.keys.contains(file.fileName) else { continue }
-                remoteStates[file.fileName] = .exists(file.lastModified)
+                remoteStates[file.fileName] = .exists(file.lastModified, file.contentLength, file.contentSha1)
                 
             case .hide:
                 // Skip if we have already encountered this file, because the first version record is the most recent one.
@@ -90,14 +90,19 @@ class FolderSyncOperation: AsyncOperation {
                 print("Could not read contentModificationDate of \(file)")
                 exit(EXIT_FAILURE)
             }
+            guard let fileSize = value.fileSize else {
+                print("Could not read file size")
+                exit(EXIT_FAILURE)
+            }
 
             if isDirectory { // Add to a set of subfolders, along with local subfolders, so we don't add 2 operations for one folder.
                 subfolders.insert(filePathRelativeToRoot)
             } else {
-                localStates[filePathRelativeToRoot] = .exists(contentModificationDate)
+                localStates[filePathRelativeToRoot] = .exists(contentModificationDate, fileSize, nil)
             }
             // TODO we *need* the watcher to get an accurate idea of local deletions.
             // TODO Maybe upon local deletion, we 'hide' remotely but don't even do a full sync or anything.
+            // TODO for local deletions, think about how to model folder deletes, given that if we simply make `.deleted.DATE.FILENAME` in the same folder it'll be lost. Instead create 'FlareRoot/relevant/folder/here/.deleted.foo.filename ? And for sync deletions, *move* to same file?
             // TODO Or maybe on local deletion, create a .deleted.XFILENAME file which this'll then pick up and remove once synced.
         }
                 
@@ -118,17 +123,28 @@ class FolderSyncOperation: AsyncOperation {
             let localState = localStates[file] ?? .missing
             let remoteState = remoteStates[file] ?? .missing
             switch (localState, remoteState) {
-            case (.exists(let localDate), .exists(let remoteDate)):
-                if abs(localDate.timeIntervalSince(remoteDate)) < 1 {
-                    // Nothing to do, the dates are the same.
-                    // TODO Perhaps consider comparing file hashes?
+            case (.exists(let localDate, let localSize, let localSha1), .exists(let remoteDate, let remoteSize, let remoteSha1)):
+                // Do the 3 date comparisons: same/earlier/later:
+                if abs(localDate.timeIntervalSince(remoteDate)) < 1 { // Same date.
+                    if localSize == remoteSize {
+                        // Nothing to do, the sizes and dates are the same.
+                        // Don't bother comparing sha1's if both date and size are the same, we can't cover *every* edge case that'll ever occur, we're not going for 5 9's of reliability here, the time spent hashing everything outweighs that.
+                    } else if localSize > remoteSize { // Somehow dates match but local is bigger, so i assume bigger is better and upload.
+                        // No point looking at sha1's: if the sizes are different, the sha's will certainly be different.
+                        actions.append(.upload(file))
+                    } else { // Dates match but remote is bigger; bigger is better; download.
+                        actions.append(.download(file))
+                    }
                 } else if localDate > remoteDate {
+                    // TODO as an optimisation, if the hashes match, only need to 'touch' the remote file to mark it as synced.
+                    // Don't cap the file size when loading the local sha1, because it'll still be quicker than up/downloading!
                     actions.append(.upload(file))
                 } else {
+                    // TODO as an optimisation, if the hashes match, only need to 'touch' the local file to mark it as synced.
                     actions.append(.download(file))
                 }
                 
-            case (.exists(let localDate), .deleted(let remoteDate)):
+            case (.exists(let localDate, _, _), .deleted(let remoteDate)):
                 if localDate > remoteDate {
                     actions.append(.upload(file))
                 } else {
@@ -138,7 +154,7 @@ class FolderSyncOperation: AsyncOperation {
             case (.exists, .missing):
                 actions.append(.upload(file))
                 
-            case (.deleted(let localDate), .exists(let remoteDate)):
+            case (.deleted(let localDate), .exists(let remoteDate, _, _)):
                 if localDate > remoteDate {
                     actions.append(.deleteRemote(file))
                 } else {
@@ -193,7 +209,7 @@ class FolderSyncOperation: AsyncOperation {
 }
 
 enum SyncFileState {
-    case exists(Date)
+    case exists(Date, Int, String?) // modified, size in bytes, sha1 for remote only.
     case deleted(Date)
     case missing
 }
@@ -226,7 +242,7 @@ extension String {
 fileprivate func myContents(ofDirectory: URL) throws -> [URL] {
     do {
         return try FileManager.default.contentsOfDirectory(at: ofDirectory,
-            includingPropertiesForKeys: [URLResourceKey.isDirectoryKey, .contentModificationDateKey],
+                                                           includingPropertiesForKeys: [URLResourceKey.isDirectoryKey, .contentModificationDateKey, .fileSizeKey],
             options: .skipsHiddenFiles)
     } catch (let error as NSError) {
         if error.code == 260 { // No such directory, which is fine, just needs to be synced down.
@@ -240,8 +256,8 @@ fileprivate func myContents(ofDirectory: URL) throws -> [URL] {
 enum SyncAction {
     case upload(String)
     case download(String)
-    case deleteLocal(String)
+    case deleteLocal(String) // TODO rename to a hidden '.deleted.DATE.ORIGINAL_FILENAME' as a metadata thing, which gets deleted in a month.
     case deleteRemote(String)
-    case clearLocalDeletedMetadata(String)
+    case clearLocalDeletedMetadata(String) // Delete '.deleted.*.ORIGINAL_FILENAME' with wildcard in case there are multiple deletions.
     case clearRemoteDeletedMetadata(String)
 }
