@@ -12,7 +12,9 @@ import Foundation
 enum FolderSyncOperation {
     enum Errors: Error {
         case nilAuthToken
-        case nilResourceValues
+        case nilIsDirectory
+        case nilContentModificationDate
+        case nilFileSize
     }
     
     /// Path is nil for root folder, otherwise something like 'foo/bar/' with a trailing slash.
@@ -60,12 +62,11 @@ enum FolderSyncOperation {
         let rootUrl = URL(fileURLWithPath: syncContext.config.folder)
         for file in contents {
             let filePathRelativeToRoot = file.absoluteString.deleting(prefix: rootUrl.absoluteString) // For folders, this'll give us a trailing slash which is what we need to suit bz.
+            print("Getting resource values for \(file)")
             let resourceValues = try file.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey])
-            guard let isDirectory = resourceValues.isDirectory,
-                let contentModificationDate = resourceValues.contentModificationDate,
-                let fileSize = resourceValues.fileSize else {
-                throw Errors.nilResourceValues
-            }
+            guard let isDirectory = resourceValues.isDirectory else { throw Errors.nilIsDirectory }
+            guard let contentModificationDate = resourceValues.contentModificationDate else { throw Errors.nilContentModificationDate }
+            guard let fileSize = resourceValues.fileSize else { throw Errors.nilFileSize }
 
             if isDirectory { // Add to a set of subfolders, along with local subfolders, so we don't add 2 operations for one folder.
                 subfolders.insert(filePathRelativeToRoot)
