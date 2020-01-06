@@ -16,7 +16,8 @@ enum FolderSyncOperation {
     }
     
     /// Path is nil for root folder, otherwise something like 'foo/bar/' with a trailing slash.
-    static func sync(path: String?, syncContext: SyncContext) throws {
+    /// Returns subfolders.
+    static func sync(path: String?, syncContext: SyncContext) throws -> [String] {
         guard let auth = syncContext.authorizeAccountResponse else {
             throw Errors.nilAuthToken
         }
@@ -75,14 +76,6 @@ enum FolderSyncOperation {
             // TODO Maybe upon local deletion, we 'hide' remotely but don't even do a full sync or anything.
             // TODO for local deletions, think about how to model folder deletes, given that if we simply make `.deleted.DATE.FILENAME` in the same folder it'll be lost. Instead create 'FlareRoot/relevant/folder/here/.deleted.foo.filename ? And for sync deletions, *move* to same file?
             // TODO Or maybe on local deletion, create a .deleted.XFILENAME file which this'll then pick up and remove once synced.
-        }
-                
-        // Queue subfolders.
-        for subfolder in subfolders {
-            print("Subfolder: \(subfolder)")
-            // TODO compare dates of subfolders, only run a reconciliation if different.
-            // Will bz give us a subfolder date that is bumped whenever a child file is changed?
-            let op = FolderSyncOperation(syncContext: syncContext, path: subfolder)
         }
 
         // Finally reconcile.
@@ -163,8 +156,12 @@ enum FolderSyncOperation {
         print("Actions:")
         print(actions)
         print(" /actions")
-        
+
         // TODO when doing the actions, do the smallest files first for speed.
         // TODO if another notification comes in for this folder, then once finishing syncing the next file, restart the folder.
+
+        // TODO compare dates of subfolders, only run a reconciliation if different.
+        // Will bz give us a subfolder date that is bumped whenever a child file is changed?
+        return Array(subfolders).sorted()
     }
 }

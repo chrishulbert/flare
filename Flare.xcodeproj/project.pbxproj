@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		83104A2423C319AB00D02EB2 /* SyncHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83104A2323C319AB00D02EB2 /* SyncHelpers.swift */; };
+		83104A2623C3222500D02EB2 /* RecursiveFolderSyncOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83104A2523C3222500D02EB2 /* RecursiveFolderSyncOperation.swift */; };
 		83672EEE233787DA00CAF32A /* GetUploadUrl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83672EED233787DA00CAF32A /* GetUploadUrl.swift */; };
 		836B352F2330B1EC00E4B0C2 /* HideFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836B352E2330B1EC00E4B0C2 /* HideFile.swift */; };
 		8379F30F234606ED004717F3 /* FolderSyncOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F30E234606ED004717F3 /* FolderSyncOperation.swift */; };
@@ -45,6 +46,7 @@
 
 /* Begin PBXFileReference section */
 		83104A2323C319AB00D02EB2 /* SyncHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncHelpers.swift; sourceTree = "<group>"; };
+		83104A2523C3222500D02EB2 /* RecursiveFolderSyncOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecursiveFolderSyncOperation.swift; sourceTree = "<group>"; };
 		83672EED233787DA00CAF32A /* GetUploadUrl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetUploadUrl.swift; sourceTree = "<group>"; };
 		836B352E2330B1EC00E4B0C2 /* HideFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HideFile.swift; sourceTree = "<group>"; };
 		8379F30E234606ED004717F3 /* FolderSyncOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderSyncOperation.swift; sourceTree = "<group>"; };
@@ -115,6 +117,7 @@
 				8379F30E234606ED004717F3 /* FolderSyncOperation.swift */,
 				8379F31223460994004717F3 /* SyncContext.swift */,
 				83104A2323C319AB00D02EB2 /* SyncHelpers.swift */,
+				83104A2523C3222500D02EB2 /* RecursiveFolderSyncOperation.swift */,
 			);
 			path = Sync;
 			sourceTree = "<group>";
@@ -210,6 +213,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 83F27B47231CDA5F006ADDC9;
 			packageReferences = (
@@ -248,6 +252,7 @@
 				83BFA0D12338F1FA00DF488C /* Uploader.swift in Sources */,
 				83E9EA2B231F5A4700AA965E /* AuthorizeAccount.swift in Sources */,
 				839295AD233EEEF900C9A295 /* Witness.swift in Sources */,
+				83104A2623C3222500D02EB2 /* RecursiveFolderSyncOperation.swift in Sources */,
 				8379F30F234606ED004717F3 /* FolderSyncOperation.swift in Sources */,
 				83E1B8A4231F5DC100C1150D /* Helpers.swift in Sources */,
 			);

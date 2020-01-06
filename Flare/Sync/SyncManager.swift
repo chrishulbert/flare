@@ -45,7 +45,7 @@ class SyncManager {
     private func startAndThrowErrors() throws {
         let syncContext = try SyncContext()
         syncContext.authorizeAccountResponse = try AuthorizeAccount.send(accountId: syncContext.config.accountId, applicationKey: syncContext.config.applicationKey)
-        try FolderSyncOperation.sync(path: nil, syncContext: syncContext)
+        try RecursiveFolderSyncOperation.sync(path: nil, syncContext: syncContext)
     }
     
 }
