@@ -63,14 +63,14 @@ enum FolderSyncOperation {
         for file in contents {
             let filePathRelativeToRoot = file.absoluteString.deleting(prefix: rootUrl.absoluteString) // For folders, this'll give us a trailing slash which is what we need to suit bz.
             print("Getting resource values for \(file)")
-            let resourceValues = try file.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey])
+            let resourceValues = try file.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey, .fileSizeKey])
             guard let isDirectory = resourceValues.isDirectory else { throw Errors.nilIsDirectory }
             guard let contentModificationDate = resourceValues.contentModificationDate else { throw Errors.nilContentModificationDate }
-            guard let fileSize = resourceValues.fileSize else { throw Errors.nilFileSize }
 
             if isDirectory { // Add to a set of subfolders, along with local subfolders, so we don't add 2 operations for one folder.
-                subfolders.insert(filePathRelativeToRoot)
+                subfolders.insert(filePathRelativeToRoot) // TODO include the contentModificationDate for comparison.
             } else {
+                guard let fileSize = resourceValues.fileSize else { throw Errors.nilFileSize } // Can only get filesize if not a dir.
                 localStates[filePathRelativeToRoot] = .exists(contentModificationDate, fileSize, nil)
             }
             // TODO we *need* the watcher to get an accurate idea of local deletions.

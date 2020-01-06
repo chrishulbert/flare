@@ -15,7 +15,7 @@ enum RecursiveFolderSyncOperation {
         let subfolders = try FolderSyncOperation.sync(path: path, syncContext: syncContext)
         for subfolder in subfolders {
             print("Subfolder: \(subfolder)")
-            try sync(path: path, syncContext: syncContext)
+            try sync(path: subfolder, syncContext: syncContext)
         }
     }
 
