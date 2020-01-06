@@ -10,6 +10,7 @@ import Foundation
 
 /// https://www.backblaze.com/b2/docs/b2_hide_file.html
 /// apiUrl is eg "https://apiNNN.backblazeb2.com"
+/// Can return Errors.not200(400, "already_hidden", _)) if it's already hidden.
 enum HideFile {
     static func send(token: String, apiUrl: String, bucketId: String, fileName: String) throws {
         guard let url = URL(string: apiUrl + "/b2api/v2/b2_hide_file") else {

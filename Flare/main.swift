@@ -32,8 +32,6 @@ import Foundation
 //let demoFileName = "Demo.txt"
 //let demoData = "Lorem ipsum".data(using: .utf8)!
 //let demoLastModified = Date()
-
-let syncContext = SyncContext()
 //
 //AuthorizeAccount.send(accountId: config.accountId, applicationKey: config.applicationKey, completion: { result in
 //    switch result {

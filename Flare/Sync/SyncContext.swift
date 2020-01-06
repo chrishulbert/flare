@@ -13,7 +13,7 @@ class SyncContext {
     let config: SyncConfig
     var authorizeAccountResponse: AuthorizeAccountResponse?
     
-    init() {
-        config = .load()
+    init() throws {
+        config = try .load()
     }
 }

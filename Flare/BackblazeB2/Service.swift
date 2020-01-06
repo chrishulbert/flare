@@ -36,10 +36,7 @@ class Service {
     }
     
     private func postOrPut(httpMethod: String, url: URL, payload: Any, headers: [String: String], token: String?, timeoutInterval: TimeInterval?) throws -> ([AnyHashable: Any], Data) {
-        guard let body = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
-            throw Errors.couldNotSerialiseJson
-        }
-        
+        let body = try JSONSerialization.data(withJSONObject: payload, options: [])
         var newHeaders = headers
         newHeaders["Content-Type"] = "application/json"
         
@@ -80,7 +77,6 @@ class Service {
     enum Errors: Error {
         case badApiUrl
         case urlComponents
-        case couldNotSerialiseJson
         case unauthorized401
         case not200(Int, String?, String?) // HTTP code, code, message
         case missingResponseData
@@ -128,13 +124,6 @@ private extension URLSession {
         return (data2, response2)
     }
     
-}
-
-private extension Data {
-    var asJson: [AnyHashable: Any]? {
-        let json = try? JSONSerialization.jsonObject(with: self, options: [])
-        return json as? [AnyHashable: Any]
-    }
 }
 
 private extension URLRequest {

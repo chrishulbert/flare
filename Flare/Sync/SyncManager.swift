@@ -43,8 +43,9 @@ class SyncManager {
     
     // You could think of this as the 'main' function in this executable. From here on, errors aren't handled, they are simply thrown.
     private func startAndThrowErrors() throws {
+        let syncContext = try SyncContext()
         syncContext.authorizeAccountResponse = try AuthorizeAccount.send(accountId: syncContext.config.accountId, applicationKey: syncContext.config.applicationKey)
-        FolderSyncOperation(syncContext: syncContext, path: nil)
+        try FolderSyncOperation.sync(path: nil, syncContext: syncContext)
     }
     
 }

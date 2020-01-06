@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		83104A2423C319AB00D02EB2 /* SyncHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83104A2323C319AB00D02EB2 /* SyncHelpers.swift */; };
 		83672EEE233787DA00CAF32A /* GetUploadUrl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83672EED233787DA00CAF32A /* GetUploadUrl.swift */; };
 		836B352F2330B1EC00E4B0C2 /* HideFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836B352E2330B1EC00E4B0C2 /* HideFile.swift */; };
 		8379F30F234606ED004717F3 /* FolderSyncOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F30E234606ED004717F3 /* FolderSyncOperation.swift */; };
@@ -43,6 +44,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		83104A2323C319AB00D02EB2 /* SyncHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncHelpers.swift; sourceTree = "<group>"; };
 		83672EED233787DA00CAF32A /* GetUploadUrl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetUploadUrl.swift; sourceTree = "<group>"; };
 		836B352E2330B1EC00E4B0C2 /* HideFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HideFile.swift; sourceTree = "<group>"; };
 		8379F30E234606ED004717F3 /* FolderSyncOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderSyncOperation.swift; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 				8379F31023460905004717F3 /* BzAuthorizeOperation.swift */,
 				8379F30E234606ED004717F3 /* FolderSyncOperation.swift */,
 				8379F31223460994004717F3 /* SyncContext.swift */,
+				83104A2323C319AB00D02EB2 /* SyncHelpers.swift */,
 			);
 			path = Sync;
 			sourceTree = "<group>";
@@ -229,6 +232,7 @@
 				83E2D26423378F86005E8632 /* UploadFile.swift in Sources */,
 				8379F31323460994004717F3 /* SyncContext.swift in Sources */,
 				83E1B8A2231F5D4300C1150D /* Service.swift in Sources */,
+				83104A2423C319AB00D02EB2 /* SyncHelpers.swift in Sources */,
 				83BFA0CD2338EEB900DF488C /* UploadFileWrapped.swift in Sources */,
 				83F27B54231CDA5F006ADDC9 /* main.swift in Sources */,
 				83D74CE12340CE890053EC72 /* SyncManager.swift in Sources */,

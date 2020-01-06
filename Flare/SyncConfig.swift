@@ -17,39 +17,41 @@ struct SyncConfig {
 }
 
 extension SyncConfig {
+    enum Errors: Error {
+        case couldNotReadConfigFile
+        case couldNotJSONParseConfigFile
+        case keyMissingOrNot256bitBase64
+        case accountIdMissing
+        case applicationKeyMissing
+        case bucketIdMissing
+        case folderMissing
+    }
+    
     // Load the config from disk.
-    static func load() -> SyncConfig {
+    static func load() throws -> SyncConfig {
         let configPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".flare")
         guard let configData = try? Data(contentsOf: configPath) else {
-            print("Could not read config file")
-            exit(EXIT_FAILURE)
+            throw Errors.couldNotReadConfigFile
         }
-        guard let configJsonAny = try? JSONSerialization.jsonObject(with: configData, options: []),
-            let configJson = configJsonAny as? [AnyHashable: Any] else {
-            print("Could not json-parse config file")
-            exit(EXIT_FAILURE)
+        guard let configJson = configData.asJson else {
+            throw Errors.couldNotJSONParseConfigFile
         }
         guard let keyRaw = configJson["key"] as? String,
             let key = Data(base64Encoded: keyRaw),
             key.count == 32 else {
-            print("Could not find 'key' in config file, or it's not base64, or it's not 256 bits")
-            exit(EXIT_FAILURE)
+            throw Errors.keyMissingOrNot256bitBase64
         }
         guard let accountId = configJson["accountId"] as? String else {
-            print("Could not find 'accountId' in config file")
-            exit(EXIT_FAILURE)
+            throw Errors.accountIdMissing
         }
         guard let applicationKey = configJson["applicationKey"] as? String else {
-            print("Could not find 'applicationKey' in config file")
-            exit(EXIT_FAILURE)
+            throw Errors.applicationKeyMissing
         }
         guard let bucketId = configJson["bucketId"] as? String else {
-            print("Could not find 'bucketId' in config file")
-            exit(EXIT_FAILURE)
+            throw Errors.bucketIdMissing
         }
         guard let folder = configJson["folder"] as? String else {
-            print("Could not find 'folder' in config file")
-            exit(EXIT_FAILURE)
+            throw Errors.folderMissing
         }
         return SyncConfig(key: key, accountId: accountId, applicationKey: applicationKey, bucketId: bucketId, folder: folder)
     }

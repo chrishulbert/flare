@@ -9,36 +9,21 @@
 import Foundation
 
 /// This syncs a single folder, and spawns ops for its subfolders.
-class FolderSyncOperation: AsyncOperation {
-    let syncContext: SyncContext
-    let path: String? // Nil for root folder, otherwise something like 'foo/bar/' with a trailing slash.
-    init(syncContext: SyncContext, path: String?) {
-        self.syncContext = syncContext
-        self.path = path
-        super.init()
+enum FolderSyncOperation {
+    enum Errors: Error {
+        case nilAuthToken
+        case nilResourceValues
     }
     
-    override func asyncStart() {
+    /// Path is nil for root folder, otherwise something like 'foo/bar/' with a trailing slash.
+    static func sync(path: String?, syncContext: SyncContext) throws {
         guard let auth = syncContext.authorizeAccountResponse else {
-            print("Missing auth token")
-            exit(EXIT_FAILURE)
+            throw Errors.nilAuthToken
         }
         
         print("FolderSyncOperation: \(path ?? ">root<")")
-        ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: path, delimiter: "/", completion: { [weak self] result in
-            switch result {
-            case .success(let files):
-                self?.handle(files: files)
-                
-            case .failure(let error):
-                print("FolderSyncOperation > ListAllFileVersions error: \(error)")
-                exit(EXIT_FAILURE)
-            }
-        })
-    }
+        let files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: path, delimiter: "/")
 
-    /// Handle the returned files listing
-    func handle(files: [ListFileVersionsFile]) {
         // Firstly collect a list of the 'remote' state.
         // TODO ignore '.bzEmpty' eg empty folder - or is this only a created-by-web-ui thing?
         var subfolders: Set<String> = []
@@ -68,31 +53,17 @@ class FolderSyncOperation: AsyncOperation {
         
         // Next collect a list of 'local' state.
         // Contents of directory doesn't return '._*' files eg ds store
-        // TODO make it skip files that can't be accessed locally eg they're being saved or something, deal with them next time?
-        let contentsRaw = try? myContents(ofDirectory: pathUrl)
-        guard let contents = contentsRaw else {
-            print("Could not read contents of \(pathUrl)")
-            exit(EXIT_FAILURE)
-        }
+        // TODO make it skip files that can't be accessed locally eg they're being saved or something, eg mark them as 'skip this!', deal with them next time around?
+        let contents = try FileManager.default.myContents(ofDirectory: syncContext.pathUrl(path: path))
         var localStates: [String: SyncFileState] = [:]
         let rootUrl = URL(fileURLWithPath: syncContext.config.folder)
         for file in contents {
-            let filePathRelativeToRoot = file.absoluteString.deleting(prefix: rootUrl.absoluteString) // For folders, this'll give us a trailing slash which is great.
-            guard let value = try? file.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey]) else {
-                print("Could not read resource values of \(file)")
-                exit(EXIT_FAILURE)
-            }
-            guard let isDirectory = value.isDirectory else {
-                print("Could not read isDirectory of \(file)")
-                exit(EXIT_FAILURE)
-            }
-            guard let contentModificationDate = value.contentModificationDate else {
-                print("Could not read contentModificationDate of \(file)")
-                exit(EXIT_FAILURE)
-            }
-            guard let fileSize = value.fileSize else {
-                print("Could not read file size")
-                exit(EXIT_FAILURE)
+            let filePathRelativeToRoot = file.absoluteString.deleting(prefix: rootUrl.absoluteString) // For folders, this'll give us a trailing slash which is what we need to suit bz.
+            let resourceValues = try file.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey])
+            guard let isDirectory = resourceValues.isDirectory,
+                let contentModificationDate = resourceValues.contentModificationDate,
+                let fileSize = resourceValues.fileSize else {
+                throw Errors.nilResourceValues
             }
 
             if isDirectory { // Add to a set of subfolders, along with local subfolders, so we don't add 2 operations for one folder.
@@ -110,9 +81,8 @@ class FolderSyncOperation: AsyncOperation {
         for subfolder in subfolders {
             print("Subfolder: \(subfolder)")
             // TODO compare dates of subfolders, only run a reconciliation if different.
+            // Will bz give us a subfolder date that is bumped whenever a child file is changed?
             let op = FolderSyncOperation(syncContext: syncContext, path: subfolder)
-            SyncManager.shared.finalOperation.addDependency(op) // Ensure my new op runs before the 'final' one.
-            SyncManager.shared.queue.addOperation(op)
         }
 
         // Finally reconcile.
@@ -196,70 +166,5 @@ class FolderSyncOperation: AsyncOperation {
         
         // TODO when doing the actions, do the smallest files first for speed.
         // TODO if another notification comes in for this folder, then once finishing syncing the next file, restart the folder.
-        
-        asyncFinish()
     }
-    
-    var pathUrl: URL {
-        let root = URL(fileURLWithPath: syncContext.config.folder)
-        if let path = path {
-            return URL(fileURLWithPath: path, relativeTo: root)
-        } else {
-            return root
-        }
-    }
-}
-
-enum SyncFileState {
-    case exists(Date, Int, String?) // modified, size in bytes, sha1 for remote only.
-    case deleted(Date)
-    case missing
-}
-
-extension ListFileVersionsFile {
-    /// Grabs the 'last modified' date if it can, otherwise uses the upload timestamp as a backup.
-    var lastModified: Date {
-        if let millis = fileInfo["src_last_modified_millis"] as? Int {
-            return millis.asDate
-        } else {
-            return uploadTimestamp.asDate
-        }
-    }
-}
-
-extension Int {
-    var asDate: Date {
-        return Date(timeIntervalSince1970: TimeInterval(self) / 1000)
-    }
-}
-
-extension String {
-    func deleting(prefix: String) -> String {
-        guard self.hasPrefix(prefix) else { return self }
-        return String(self.dropFirst(prefix.count))
-    }
-}
-
-/// Gets the contents of a dir, gracefully returning [] if the dir doesn't exist, thus needs to be synced down.
-fileprivate func myContents(ofDirectory: URL) throws -> [URL] {
-    do {
-        return try FileManager.default.contentsOfDirectory(at: ofDirectory,
-                                                           includingPropertiesForKeys: [URLResourceKey.isDirectoryKey, .contentModificationDateKey, .fileSizeKey],
-            options: .skipsHiddenFiles)
-    } catch (let error as NSError) {
-        if error.code == 260 { // No such directory, which is fine, just needs to be synced down.
-            return []
-        } else {
-            throw error // Unknown error we shouldn't ignore.
-        }
-    }
-}
-
-enum SyncAction {
-    case upload(String)
-    case download(String)
-    case deleteLocal(String) // TODO rename to a hidden '.deleted.DATE.ORIGINAL_FILENAME' as a metadata thing, which gets deleted in a month.
-    case deleteRemote(String)
-    case clearLocalDeletedMetadata(String) // Delete '.deleted.*.ORIGINAL_FILENAME' with wildcard in case there are multiple deletions.
-    case clearRemoteDeletedMetadata(String)
 }
