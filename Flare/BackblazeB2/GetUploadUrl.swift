@@ -16,25 +16,16 @@ import Foundation
 /// To achieve faster upload speeds, request multiple uploadUrls and upload your files to these different
 /// endpoints in parallel.
 enum GetUploadUrl {
-    static func send(token: String, apiUrl: String, bucketId: String, completion: @escaping (Result<UploadParams, Error>) -> ()) {
+    static func send(token: String, apiUrl: String, bucketId: String) throws -> UploadParams {
         guard let url = URL(string: apiUrl + "/b2api/v2/b2_get_upload_url") else {
-            completion(.failure(Service.Errors.badApiUrl))
-            return
+            throw Service.Errors.badApiUrl
         }
 
-        Service.shared.post(url: url, payload: [ "bucketId": bucketId ], token: token, completion: {result in
-            switch result {
-            case .success(let json, _):
-                guard let response = UploadParams.from(json: json) else {
-                    completion(.failure(Service.Errors.invalidResponse))
-                    return
-                }
-                completion(.success(response))
-                
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        })
+        let (json, _) = try Service.shared.post(url: url, payload: [ "bucketId": bucketId ], token: token)
+        guard let response = UploadParams.from(json: json) else {
+            throw Service.Errors.invalidResponse
+        }
+        return response
     }
 }
 

@@ -10,24 +10,14 @@ import Foundation
 
 /// https://www.backblaze.com/b2/docs/b2_authorize_account.html
 enum AuthorizeAccount {
-    static func send(accountId: String, applicationKey: String, completion: @escaping (Result<AuthorizeAccountResponse, Error>) -> ()) {
+    static func send(accountId: String, applicationKey: String) throws -> AuthorizeAccountResponse {
         let url = URL(string: "https://api.backblazeb2.com/b2api/v1/b2_authorize_account")!
         var request = URLRequest(url: url)
         let auth = (accountId + ":" + applicationKey).asData.base64EncodedString()
         request.addValue("Basic " + auth, forHTTPHeaderField: "Authorization")
-        Service.shared.make(request: request, completion: { result in
-            switch result {
-            case .success(let json, _):
-                if let response = AuthorizeAccountResponse.from(json: json) {
-                    completion(.success(response))
-                } else {
-                    completion(.failure(Service.Errors.invalidResponse))
-                }
-                
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        })
+        let (json, _) = try Service.shared.make(request: request)
+        guard let response = AuthorizeAccountResponse.from(json: json) else { throw Service.Errors.invalidResponse }
+        return response
     }
 }
 

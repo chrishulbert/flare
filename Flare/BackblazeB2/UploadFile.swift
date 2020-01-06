@@ -17,8 +17,13 @@ import Foundation
 /// endpoints in parallel.
 /// You shouldn't use this directly, use UploadFileWrapped instead.
 enum UploadFile {
-    static func send(token: String, uploadUrl: URL, fileName: String, file: Data, lastModified: Date, completion: @escaping (Result<(), Error>) -> ()) {
-        let percentName = fileName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+    static func send(token: String, uploadUrl: URL, fileName: String, file: Data, lastModified: Date) throws {
+        guard let percentName = fileName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {
+            enum Errors: Error {
+                case couldNotEscape
+            }
+            throw Errors.couldNotEscape
+        }
         let headers: [String: String] = [
             "X-Bz-File-Name": percentName,
             "Content-Type": "b2/x-auto",
@@ -26,14 +31,6 @@ enum UploadFile {
             "X-Bz-Content-Sha1": file.asSha1.asHexString,
             "X-Bz-Info-src_last_modified_millis": lastModified.asBzString,
         ]
-        Service.shared.postOrPutRaw(httpMethod: "POST", url: uploadUrl, body: file, headers: headers, token: token, completion: { result in
-            switch result {
-            case .success:
-                completion(.success(()))
-                
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        })
+        _ = try Service.shared.postOrPutRaw(httpMethod: "POST", url: uploadUrl, body: file, headers: headers, token: token)
     }
 }

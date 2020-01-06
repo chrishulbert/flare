@@ -19,10 +19,9 @@ import Foundation
 /// Hide record uploadTimestamp": 1568850170000 is the time of hiding.
 /// Folders are returned with names like 'photos/cats/'
 enum ListFileVersions {
-    static func send(token: String, apiUrl: String, bucketId: String, startFileName: String?, startFileId: String?, prefix: String?, delimiter: String?, completion: @escaping (Result<ListFileVersionsResponse, Error>) -> ()) {
+    static func send(token: String, apiUrl: String, bucketId: String, startFileName: String?, startFileId: String?, prefix: String?, delimiter: String?) throws -> ListFileVersionsResponse {
         guard let url = URL(string: apiUrl + "/b2api/v2/b2_list_file_versions") else {
-            completion(.failure(Service.Errors.badApiUrl))
-            return
+            throw Service.Errors.badApiUrl
         }
         var body: [String: Any] = [
             "bucketId": bucketId,
@@ -40,16 +39,8 @@ enum ListFileVersions {
             body["delimiter"] = delimiter
         }
 
-        Service.shared.post(url: url, payload: body, token: token, completion: {result in
-            switch result {
-            case .success(let json, _):
-                let response = ListFileVersionsResponse.from(json: json)
-                completion(.success(response))
-                
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        })
+        let (json, _) = try Service.shared.post(url: url, payload: body, token: token)
+        return ListFileVersionsResponse.from(json: json)
     }
 }
 

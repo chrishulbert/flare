@@ -9,28 +9,42 @@
 import Foundation
 
 /// This manages the queue of things to do.
+/// Even though we're running everything synchronously/blocking,
+/// we need to allow the NSRunLoop to run on the main thread for URLSession to work,
+/// so this wraps the core logic of the app in its own queue.
 class SyncManager {
     static let shared = SyncManager()
     
     let queue: OperationQueue = {
         let q = OperationQueue()
-        q.maxConcurrentOperationCount = 1 // TODO bump this up to 1 per cpu, and add the appropriate dependencies between ops? Or would that suck for the upload pod reuse?
+        q.maxConcurrentOperationCount = 1
         q.name = "SyncManager"
         return q
     }()
     
-    /// This is exposed so other ops can add themselves as dependencies of this.
-    let finalOperation = BlockOperation(block: {
-        print("Success!")
-        exit(EXIT_SUCCESS)
-    })
-    
     /// Enqueue the operations necessary to get started.
     func enqueueStart() {
-        queue.addOperations([
-            BzAuthorizeOperation(syncContext: syncContext),
-            FolderSyncOperation(syncContext: syncContext, path: nil),
-            finalOperation,
-        ], waitUntilFinished: false)
+        queue.addOperation {
+            self.startAndHandleErrors()
+        }
     }
+    
+    /// This runs, handling errors gracefully.
+    private func startAndHandleErrors() {
+        do {
+            try startAndThrowErrors()
+        } catch (let error) {
+            print("Error: \(error)")
+            exit(EXIT_FAILURE)
+        }
+        print("Success!")
+        exit(EXIT_SUCCESS)
+    }
+    
+    // You could think of this as the 'main' function in this executable. From here on, errors aren't handled, they are simply thrown.
+    private func startAndThrowErrors() throws {
+        syncContext.authorizeAccountResponse = try AuthorizeAccount.send(accountId: syncContext.config.accountId, applicationKey: syncContext.config.applicationKey)
+        FolderSyncOperation(syncContext: syncContext, path: nil)
+    }
+    
 }

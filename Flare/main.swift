@@ -112,41 +112,5 @@ let syncContext = SyncContext()
 //    print("---")
 //}
 
-class Foo: AsyncOperation {
-    override func asyncStart() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-            print("...almost there...")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-                print("...done!...")
-                self.asyncFinish()
-            })
-        })
-    }
-}
-
-class Bar: AsyncOperation {
-    override func asyncStart() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-            print("...bar a...")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-                print("...bar done!...")
-                self.asyncFinish()
-            })
-        })
-    }
-}
-
-let promise = PromiseOperation { completion in
-    print("...promise 1/3...")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-        print("...promise 2/3...")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-            print("...promise 3/3 done!...")
-            completion()
-        })
-    })
-
-}
-
 SyncManager.shared.enqueueStart()
 RunLoop.main.run()

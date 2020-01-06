@@ -137,6 +137,7 @@ class FolderSyncOperation: AsyncOperation {
                     }
                 } else if localDate > remoteDate {
                     // TODO as an optimisation, if the hashes match, only need to 'touch' the remote file to mark it as synced.
+                    // This will mean that even if resyncing a folder, sha's will only be slowly recalculated once, to fix the dates.
                     // Don't cap the file size when loading the local sha1, because it'll still be quicker than up/downloading!
                     actions.append(.upload(file))
                 } else {
@@ -194,6 +195,7 @@ class FolderSyncOperation: AsyncOperation {
         print(" /actions")
         
         // TODO when doing the actions, do the smallest files first for speed.
+        // TODO if another notification comes in for this folder, then once finishing syncing the next file, restart the folder.
         
         asyncFinish()
     }

@@ -10,29 +10,30 @@ import Foundation
 
 /// This does an upload, and figures out if any error means 'retry another Backblaze pod' or 'legitimate error'.
 enum UploadFileWrapped {
-    static func send(token: String, uploadParams: UploadParams, fileName: String, file: Data, lastModified: Date, completion: @escaping (UploadResult) -> ()) {
-        UploadFile.send(token: uploadParams.authorizationToken, uploadUrl: uploadParams.uploadUrl, fileName: fileName, file: file, lastModified: lastModified, completion: { result in
-            switch result {
-            case .success:
-                completion(.success)
-                
-            case .failure(let error):
-                completion(.from(error: error))
+    static func send(token: String, uploadParams: UploadParams, fileName: String, file: Data, lastModified: Date) throws -> UploadResult {
+        do {
+            try UploadFile.send(token: uploadParams.authorizationToken, uploadUrl: uploadParams.uploadUrl, fileName: fileName, file: file, lastModified: lastModified)
+            return .success
+        } catch (let error) {
+            if let res = UploadResult.from(error: error) {
+                return res
+            } else {
+                throw error
             }
-        })
+        }
     }
 }
 
 enum UploadResult {
     case success
-    case failure(Error)
     case needNewUploadUrl(Error) // There was an issue with the backblaze pod you tried to use.
 }
 
 extension UploadResult {
     /// Parses an error to determine if it's one of the errors that Backblaze recommends getting a new upload url for.
     /// https://www.backblaze.com/b2/docs/uploading.html
-    static func from(error: Error) -> UploadResult {
+    /// Returns nil if plain error.
+    static func from(error: Error) -> UploadResult? {
         let nse = error as NSError
         if nse.code == NSURLErrorCannotConnectToHost || nse.code == NSURLErrorTimedOut {
             return .needNewUploadUrl(error)
@@ -50,6 +51,6 @@ extension UploadResult {
             break
         }
         // TODO detect 'broken pipe'
-        return .failure(error)
+        return nil
     }
 }

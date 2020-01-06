@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8354FD6E2344B04900CF9A6A /* PromiseOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8354FD6D2344B04900CF9A6A /* PromiseOperation.swift */; };
 		83672EEE233787DA00CAF32A /* GetUploadUrl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83672EED233787DA00CAF32A /* GetUploadUrl.swift */; };
 		836B352F2330B1EC00E4B0C2 /* HideFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836B352E2330B1EC00E4B0C2 /* HideFile.swift */; };
 		8379F30F234606ED004717F3 /* FolderSyncOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F30E234606ED004717F3 /* FolderSyncOperation.swift */; };
@@ -24,7 +23,6 @@
 		83BFA0D12338F1FA00DF488C /* Uploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BFA0D02338F1FA00DF488C /* Uploader.swift */; };
 		83BFA0E4233B373B00DF488C /* SyncConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BFA0E3233B373B00DF488C /* SyncConfig.swift */; };
 		83D74CE12340CE890053EC72 /* SyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D74CE02340CE890053EC72 /* SyncManager.swift */; };
-		83D74CE32340D6570053EC72 /* AsyncOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D74CE22340D6570053EC72 /* AsyncOperation.swift */; };
 		83E1B8A2231F5D4300C1150D /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E1B8A1231F5D4300C1150D /* Service.swift */; };
 		83E1B8A4231F5DC100C1150D /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E1B8A3231F5DC100C1150D /* Helpers.swift */; };
 		83E2D26423378F86005E8632 /* UploadFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E2D26323378F86005E8632 /* UploadFile.swift */; };
@@ -45,7 +43,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		8354FD6D2344B04900CF9A6A /* PromiseOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromiseOperation.swift; sourceTree = "<group>"; };
 		83672EED233787DA00CAF32A /* GetUploadUrl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetUploadUrl.swift; sourceTree = "<group>"; };
 		836B352E2330B1EC00E4B0C2 /* HideFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HideFile.swift; sourceTree = "<group>"; };
 		8379F30E234606ED004717F3 /* FolderSyncOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderSyncOperation.swift; sourceTree = "<group>"; };
@@ -62,7 +59,6 @@
 		83BFA0D02338F1FA00DF488C /* Uploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Uploader.swift; sourceTree = "<group>"; };
 		83BFA0E3233B373B00DF488C /* SyncConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncConfig.swift; sourceTree = "<group>"; };
 		83D74CE02340CE890053EC72 /* SyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncManager.swift; sourceTree = "<group>"; };
-		83D74CE22340D6570053EC72 /* AsyncOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncOperation.swift; sourceTree = "<group>"; };
 		83E1B8A1231F5D4300C1150D /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
 		83E1B8A3231F5DC100C1150D /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		83E2D26323378F86005E8632 /* UploadFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadFile.swift; sourceTree = "<group>"; };
@@ -113,8 +109,6 @@
 			isa = PBXGroup;
 			children = (
 				83D74CE02340CE890053EC72 /* SyncManager.swift */,
-				83D74CE22340D6570053EC72 /* AsyncOperation.swift */,
-				8354FD6D2344B04900CF9A6A /* PromiseOperation.swift */,
 				8379F31023460905004717F3 /* BzAuthorizeOperation.swift */,
 				8379F30E234606ED004717F3 /* FolderSyncOperation.swift */,
 				8379F31223460994004717F3 /* SyncContext.swift */,
@@ -242,14 +236,12 @@
 				839FBDC023277D6E0068E1F1 /* ListFileVersions.swift in Sources */,
 				836B352F2330B1EC00E4B0C2 /* HideFile.swift in Sources */,
 				838810E4233EDD1D00C90D11 /* Watcher.swift in Sources */,
-				8354FD6E2344B04900CF9A6A /* PromiseOperation.swift in Sources */,
 				8379F31123460905004717F3 /* BzAuthorizeOperation.swift in Sources */,
 				83672EEE233787DA00CAF32A /* GetUploadUrl.swift in Sources */,
 				839295AC233EEEF900C9A295 /* EventStream.swift in Sources */,
 				83BFA0E4233B373B00DF488C /* SyncConfig.swift in Sources */,
 				839295AB233EEEF900C9A295 /* FileEvent.swift in Sources */,
 				83BFA0D12338F1FA00DF488C /* Uploader.swift in Sources */,
-				83D74CE32340D6570053EC72 /* AsyncOperation.swift in Sources */,
 				83E9EA2B231F5A4700AA965E /* AuthorizeAccount.swift in Sources */,
 				839295AD233EEEF900C9A295 /* Witness.swift in Sources */,
 				8379F30F234606ED004717F3 /* FolderSyncOperation.swift in Sources */,

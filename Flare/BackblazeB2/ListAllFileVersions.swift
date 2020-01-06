@@ -12,31 +12,23 @@ import Foundation
 /// Use a trailing slash for 'prefix' if you want a subfolder.
 enum ListAllFileVersions {
     static func send(token: String, apiUrl: String, bucketId: String, prefix: String?, delimiter: String?,
-                     startFileName: String? = nil, startFileId: String? = nil, filesSoFar: [ListFileVersionsFile] = [],
-                     completion: @escaping (Result<[ListFileVersionsFile], Error>) -> ()) {
+                     startFileName: String? = nil, startFileId: String? = nil, filesSoFar: [ListFileVersionsFile] = []) throws -> [ListFileVersionsFile] {
 
-        ListFileVersions.send(token: token, apiUrl: apiUrl, bucketId: bucketId, startFileName: nil, startFileId: nil, prefix: prefix, delimiter: delimiter, completion: { result in
-            switch result {
-            case .success(let response):
-                // Do we need to iterate?
-                if let nextFileName = response.nextFileName, let nextFileId = response.nextFileId {
-                    // Get more files.
-                    self.send(token: token,
-                              apiUrl: apiUrl,
-                              bucketId: bucketId,
-                              prefix: prefix,
-                              delimiter: delimiter,
-                              startFileName: nextFileName,
-                              startFileId: nextFileId,
-                              filesSoFar: filesSoFar + response.files,
-                              completion: completion)
-                } else { // No need to iterate any more.
-                    completion(.success(filesSoFar + response.files))
-                }
-                
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        })
+        let response = try ListFileVersions.send(token: token, apiUrl: apiUrl, bucketId: bucketId, startFileName: nil, startFileId: nil, prefix: prefix, delimiter: delimiter)
+        
+        // Do we need to iterate?
+        if let nextFileName = response.nextFileName, let nextFileId = response.nextFileId {
+            // Get more files.
+            return try send(token: token,
+                      apiUrl: apiUrl,
+                      bucketId: bucketId,
+                      prefix: prefix,
+                      delimiter: delimiter,
+                      startFileName: nextFileName,
+                      startFileId: nextFileId,
+                      filesSoFar: filesSoFar + response.files)
+        } else { // No need to iterate any more.
+            return filesSoFar + response.files
+        }
     }
 }
