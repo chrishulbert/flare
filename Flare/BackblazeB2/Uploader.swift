@@ -11,9 +11,10 @@ import Foundation
 /// https://www.backblaze.com/b2/docs/uploading.html
 /// This is responsible for wrapping GetUploadUrl and UploadFileWrapped so that it'll retry 5 times until it finds a non-busy Backblaze pod.
 enum Uploader {
+    
     /// You should pass in an uploadUrl from a previous call to GetUploadUrl, so we can reuse it until that pod is busy.
     /// Successful completion will give you the upload url to reuse (or the url it re-fetched on a retry).
-    static func send(token: String, apiUrl: String, bucketId: String, uploadParams: UploadParams, fileName: String, file: Data, lastModified: Date) throws -> UploadParams {
+    static func upload(token: String, apiUrl: String, bucketId: String, uploadParams: UploadParams, fileName: String, file: Data, lastModified: Date) throws -> UploadParams {
         let result = try UploadFileWrapped.send(token: token, uploadParams: uploadParams, fileName: fileName, file: file, lastModified: lastModified)
         switch result {
         case .success:

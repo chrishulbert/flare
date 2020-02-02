@@ -39,7 +39,7 @@ import Foundation
 //        GetUploadUrl.send(token: response.authorizationToken, apiUrl: response.apiUrl, bucketId: config.bucketId, completion: { result in
 //            switch result {
 //            case .success(let uploadParams):
-//                Uploader.send(token: response.authorizationToken, apiUrl: response.apiUrl, bucketId: config.bucketId, uploadParams: uploadParams, fileName: demoFileName, file: demoData, lastModified: demoLastModified, completion: { result in
+//                Uploader.upload(token: response.authorizationToken, apiUrl: response.apiUrl, bucketId: config.bucketId, uploadParams: uploadParams, fileName: demoFileName, file: demoData, lastModified: demoLastModified, completion: { result in
 //                    switch result {
 //                    case .success(let uploadParams):
 //                        print("Uploaded!")
@@ -110,5 +110,71 @@ import Foundation
 //    print("---")
 //}
 
-SyncManager.shared.enqueueStart()
+// You could think of this as the 'main' function in this executable. From here on, errors aren't handled, they are simply thrown.
+func runAndThrow() throws {
+    let syncContext = try SyncContext()
+    let auth = try AuthorizeAccount.send(accountId: syncContext.config.accountId, applicationKey: syncContext.config.applicationKey)
+    syncContext.authorizeAccountResponse = auth
+    let myData = "sdfgsdfgsdfg".data(using: .utf8)!
+
+    var files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: "foo/bar/", delimiter: "/")
+    print("---initial:---")
+    print(files)
+    print("------")
+    
+    var uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
+    uploadParams = try Uploader.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "newfolder/blah.txt", file: myData, lastModified: Date())
+    files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: nil, delimiter: "/")
+    print("---after uploading blah.txt:---")
+    print(files)
+    print("------")
+
+    uploadParams = try UploaderWithFolderModifications.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "foo/bar/yada/blah.txt", file: myData, lastModified: Date())
+    
+    sleep(10)
+
+    uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
+    uploadParams = try Uploader.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "newfolder/yada.txt", file: myData, lastModified: Date())
+    files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: nil, delimiter: "/")
+    print("---after uploading yada.txt:---")
+    print(files)
+    print("------")
+
+    sleep(10)
+    
+    uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
+    uploadParams = try Uploader.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "newfolder/yada2.txt", file: myData, lastModified: Date())
+    files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: nil, delimiter: "/")
+    print("---after uploading yada2.txt:---")
+    print(files)
+    print("------")
+    
+    sleep(10)
+    
+    uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
+    uploadParams = try Uploader.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "newfolder/yada3.txt", file: myData, lastModified: Date())
+    files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: nil, delimiter: "/")
+    print("---after uploading yada3.txt:---")
+    print(files)
+    print("------")
+    
+    //try RecursiveFolderSyncOperation.sync(path: nil, syncContext: syncContext)
+}
+    
+// This wraps the throwing code, displaying errors and exiting appropriately.
+func runAndExit() {
+    do {
+        try runAndThrow()
+    } catch (let error) {
+        print("Error: \(error)")
+        exit(EXIT_FAILURE)
+    }
+    print("Success!")
+    exit(EXIT_SUCCESS)
+}
+
+// Run everything in a runloop-friendly way.
+DispatchQueue.main.async { // This will run when runloop.run() is called. Using OperationQueue.main.addOperation is just as good.
+    runAndExit()
+}
 RunLoop.main.run()

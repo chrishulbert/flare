@@ -77,6 +77,7 @@ enum FolderSyncOperation {
             // TODO Maybe upon local deletion, we 'hide' remotely but don't even do a full sync or anything.
             // TODO for local deletions, think about how to model folder deletes, given that if we simply make `.deleted.DATE.FILENAME` in the same folder it'll be lost. Instead create 'FlareRoot/relevant/folder/here/.deleted.foo.filename ? And for sync deletions, *move* to same file?
             // TODO Or maybe on local deletion, create a .deleted.XFILENAME file which this'll then pick up and remove once synced.
+            // TODO When sync deletes a file, move it to a 'deleted' folder eg yyyymmd_filename which gets nuked once >1mo.
         }
 
         // Finally reconcile.

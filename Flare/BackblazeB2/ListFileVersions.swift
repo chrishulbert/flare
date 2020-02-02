@@ -18,6 +18,18 @@ import Foundation
 /// If you upload then hide: First record is action:hide, second is action:upload
 /// Hide record uploadTimestamp": 1568850170000 is the time of hiding.
 /// Folders are returned with names like 'photos/cats/'
+/// Folders don't have much useful metadata, eg nothing like the date any of its contents were last modified.
+///  "accountId": "6f92025453c2",
+///  "action": "folder",
+///  "bucketId": "364f3932f0c2656465d30c12",
+///  "contentLength": 0,
+///  "contentMd5": null,
+///  "contentSha1": null,
+///  "contentType": null,
+///  "fileId": null,
+///  "fileInfo": {},
+///  "fileName": "newfolder/",
+///  "uploadTimestamp": 0
 enum ListFileVersions {
     static func send(token: String, apiUrl: String, bucketId: String, startFileName: String?, startFileId: String?, prefix: String?, delimiter: String?) throws -> ListFileVersionsResponse {
         guard let url = URL(string: apiUrl + "/b2api/v2/b2_list_file_versions") else {
