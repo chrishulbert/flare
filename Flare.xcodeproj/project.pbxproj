@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		83104A2423C319AB00D02EB2 /* SyncHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83104A2323C319AB00D02EB2 /* SyncHelpers.swift */; };
 		83104A2623C3222500D02EB2 /* RecursiveFolderSyncOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83104A2523C3222500D02EB2 /* RecursiveFolderSyncOperation.swift */; };
+		83186B9223E82BC40011A09C /* ListFileNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83186B9123E82BC40011A09C /* ListFileNames.swift */; };
 		831D439F23E6D30100433118 /* GetFileInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831D439E23E6D30100433118 /* GetFileInfo.swift */; };
 		83672EEE233787DA00CAF32A /* GetUploadUrl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83672EED233787DA00CAF32A /* GetUploadUrl.swift */; };
 		836B352F2330B1EC00E4B0C2 /* HideFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836B352E2330B1EC00E4B0C2 /* HideFile.swift */; };
@@ -48,6 +49,7 @@
 /* Begin PBXFileReference section */
 		83104A2323C319AB00D02EB2 /* SyncHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncHelpers.swift; sourceTree = "<group>"; };
 		83104A2523C3222500D02EB2 /* RecursiveFolderSyncOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecursiveFolderSyncOperation.swift; sourceTree = "<group>"; };
+		83186B9123E82BC40011A09C /* ListFileNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListFileNames.swift; sourceTree = "<group>"; };
 		831D439E23E6D30100433118 /* GetFileInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetFileInfo.swift; sourceTree = "<group>"; };
 		83672EED233787DA00CAF32A /* GetUploadUrl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetUploadUrl.swift; sourceTree = "<group>"; };
 		836B352E2330B1EC00E4B0C2 /* HideFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HideFile.swift; sourceTree = "<group>"; };
@@ -138,6 +140,7 @@
 				83BFA0D02338F1FA00DF488C /* Uploader.swift */,
 				8377EE7D23E1055F00FEAAFD /* UploaderWithFolderModifications.swift */,
 				831D439E23E6D30100433118 /* GetFileInfo.swift */,
+				83186B9123E82BC40011A09C /* ListFileNames.swift */,
 			);
 			path = BackblazeB2;
 			sourceTree = "<group>";
@@ -242,6 +245,7 @@
 				83E1B8A2231F5D4300C1150D /* Service.swift in Sources */,
 				83104A2423C319AB00D02EB2 /* SyncHelpers.swift in Sources */,
 				83BFA0CD2338EEB900DF488C /* UploadFileWrapped.swift in Sources */,
+				83186B9223E82BC40011A09C /* ListFileNames.swift in Sources */,
 				83F27B54231CDA5F006ADDC9 /* main.swift in Sources */,
 				8379F3152346148B004717F3 /* ListAllFileVersions.swift in Sources */,
 				839FBDC023277D6E0068E1F1 /* ListFileVersions.swift in Sources */,

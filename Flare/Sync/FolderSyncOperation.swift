@@ -26,6 +26,7 @@ enum FolderSyncOperation {
         
         print("FolderSyncOperation: \(path ?? ">root<")")
         let files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: path, delimiter: "/")
+        // TODO only use the first 'version' of a file.
 
         // Firstly collect a list of the 'remote' state.
         // TODO ignore '.bzEmpty' eg empty folder - or is this only a created-by-web-ui thing?
