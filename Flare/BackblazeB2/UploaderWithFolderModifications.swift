@@ -11,7 +11,6 @@ import Foundation
 let lastModifiedPlaceholderPrefix = ".bzlastmodified"
 
 // TODO if we're uploading 10 files, 10 folders deep, this will touch a .bzlastmodified 100 times. Find some way to combine those.
-//TODO if we upload a file with an older last modified date than others in the folder, it'll set the 'last mod' date *back* which isn't good.
 
 /*
  As a workaround to bz not giving us 'lastmodified' on folders, this gives us:
@@ -63,6 +62,24 @@ enum UploaderWithFolderModifications {
         let components = fromFile.components(separatedBy: "/")
         return (1..<components.count).map {
             components.prefix($0).joined(separator: "/")
+        }
+    }
+    
+    /// Touch the file so it's last modified put forward, but not set back, to the given date.
+    private static func touchLastModified(token: String, apiUrl: String, bucketId: String, fileName: String, lastModified: Date, uploadParams: UploadParams) throws -> UploadParams {
+        let names = try ListFileNames.send(token: token, apiUrl: apiUrl, bucketId: bucketId, startFileName: fileName, maxFileCount: 1, prefix: fileName, delimiter: nil)
+        let fileO = names.files.first(where: { $0.fileName == fileName })
+        if let file = fileO {
+            if lastModified > file.lastModified {
+                // The file is older than the new date, so upload.
+                return try Uploader.upload(token: token, apiUrl: apiUrl, bucketId: bucketId, uploadParams: uploadParams, fileName: fileName, file: Data(), lastModified: lastModified)
+            } else {
+                // The file is already newer than the date we want to set.
+                return uploadParams
+            }
+        } else {
+            // Doesn't exist, so upload.
+            return try Uploader.upload(token: token, apiUrl: apiUrl, bucketId: bucketId, uploadParams: uploadParams, fileName: fileName, file: Data(), lastModified: lastModified)
         }
     }
 
