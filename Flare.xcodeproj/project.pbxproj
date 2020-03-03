@@ -24,6 +24,7 @@
 		839295AC233EEEF900C9A295 /* EventStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839295A8233EEEF900C9A295 /* EventStream.swift */; };
 		839295AD233EEEF900C9A295 /* Witness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839295A9233EEEF900C9A295 /* Witness.swift */; };
 		839FBDC023277D6E0068E1F1 /* ListFileVersions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839FBDBF23277D6E0068E1F1 /* ListFileVersions.swift */; };
+		83B4B1FE240E631A004E6F4A /* ListAllLatestFileVersions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B4B1FD240E631A004E6F4A /* ListAllLatestFileVersions.swift */; };
 		83BFA0CD2338EEB900DF488C /* UploadFileWrapped.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BFA0CC2338EEB900DF488C /* UploadFileWrapped.swift */; };
 		83BFA0D12338F1FA00DF488C /* Uploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BFA0D02338F1FA00DF488C /* Uploader.swift */; };
 		83BFA0E4233B373B00DF488C /* SyncConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83BFA0E3233B373B00DF488C /* SyncConfig.swift */; };
@@ -64,6 +65,7 @@
 		839295A9233EEEF900C9A295 /* Witness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Witness.swift; sourceTree = "<group>"; };
 		839295AA233EEEF900C9A295 /* Witness LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Witness LICENSE"; sourceTree = "<group>"; };
 		839FBDBF23277D6E0068E1F1 /* ListFileVersions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListFileVersions.swift; sourceTree = "<group>"; };
+		83B4B1FD240E631A004E6F4A /* ListAllLatestFileVersions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListAllLatestFileVersions.swift; sourceTree = "<group>"; };
 		83BFA0CC2338EEB900DF488C /* UploadFileWrapped.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadFileWrapped.swift; sourceTree = "<group>"; };
 		83BFA0D02338F1FA00DF488C /* Uploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Uploader.swift; sourceTree = "<group>"; };
 		83BFA0E3233B373B00DF488C /* SyncConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncConfig.swift; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 				83E1B8A3231F5DC100C1150D /* Helpers.swift */,
 				839FBDBF23277D6E0068E1F1 /* ListFileVersions.swift */,
 				8379F3142346148B004717F3 /* ListAllFileVersions.swift */,
+				83B4B1FD240E631A004E6F4A /* ListAllLatestFileVersions.swift */,
 				836B352E2330B1EC00E4B0C2 /* HideFile.swift */,
 				83672EED233787DA00CAF32A /* GetUploadUrl.swift */,
 				83E2D26323378F86005E8632 /* UploadFile.swift */,
@@ -253,6 +256,7 @@
 				838810E4233EDD1D00C90D11 /* Watcher.swift in Sources */,
 				8379F31123460905004717F3 /* BzAuthorizeOperation.swift in Sources */,
 				8377EE7E23E1055F00FEAAFD /* UploaderWithFolderModifications.swift in Sources */,
+				83B4B1FE240E631A004E6F4A /* ListAllLatestFileVersions.swift in Sources */,
 				83672EEE233787DA00CAF32A /* GetUploadUrl.swift in Sources */,
 				839295AC233EEEF900C9A295 /* EventStream.swift in Sources */,
 				83BFA0E4233B373B00DF488C /* SyncConfig.swift in Sources */,

@@ -30,6 +30,8 @@ import Foundation
 ///  "fileInfo": {},
 ///  "fileName": "newfolder/",
 ///  "uploadTimestamp": 0
+/// This will return >1 version of a file. Most recent seems to come last. Which is opposite the above example re upload/hide. So maybe should sort locally.
+/// Docs say "by reverse of date/time uploaded for versions of files with the same name".
 enum ListFileVersions {
     static func send(token: String, apiUrl: String, bucketId: String, startFileName: String?, startFileId: String?, prefix: String?, delimiter: String?) throws -> ListFileVersionsResponse {
         guard let url = URL(string: apiUrl + "/b2api/v2/b2_list_file_versions") else {
@@ -78,7 +80,7 @@ struct ListFileVersionsFile {
     let contentLength: Int
     let contentSha1: String?
     let contentType: String?
-    let fileId: String?
+    let fileId: String? // Null for folders.
     let fileInfo: [AnyHashable: Any]
     let fileName: String
     let uploadTimestamp: Int
