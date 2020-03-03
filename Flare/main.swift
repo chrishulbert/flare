@@ -129,7 +129,8 @@ func runAndThrow() throws {
     print(files)
     print("------")
 
-    uploadParams = try UploaderWithFolderModifications.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "foo/bar/yada/blah.txt", file: myData, lastModified: Date())
+    let past = Date().addingTimeInterval(-24*60*60)
+    uploadParams = try UploaderWithFolderModifications.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "foo/bar/yada/blah.txt", file: myData, lastModified: past)
     
     sleep(10)
 
