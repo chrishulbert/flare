@@ -52,7 +52,7 @@ enum UploaderWithFolderModifications {
     static func upload(token: String, apiUrl: String, bucketId: String, uploadParams: UploadParams, fileName: String, file: Data, lastModified: Date) throws -> UploadParams {
         var params = try Uploader.upload(token: token, apiUrl: apiUrl, bucketId: bucketId, uploadParams: uploadParams, fileName: fileName, file: file, lastModified: lastModified)
         for folder in folders(fromFile: fileName) {
-            params = try Uploader.upload(token: token, apiUrl: apiUrl, bucketId: bucketId, uploadParams: params, fileName: folder + lastModifiedPlaceholderPrefix, file: Data(), lastModified: lastModified)
+            params = try touchLastModified(token: token, apiUrl: apiUrl, bucketId: bucketId, fileName: folder + lastModifiedPlaceholderPrefix, lastModified: lastModified, uploadParams: params)
         }
         return params
     }
