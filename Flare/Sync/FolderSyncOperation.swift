@@ -14,10 +14,9 @@ enum FolderSyncOperation {
     /// Path is nil for root folder, otherwise something like 'foo/bar/' with a trailing slash.
     /// Returns subfolders.
     static func sync(path: String?, syncContext: SyncContext) throws -> [String] {
-        let remoteState = try RemoteSyncListing.list(path: path, syncContext: syncContext)
         let localState = try LocalSyncListing.list(path: path, syncContext: syncContext)
-        
-        // Next collect a list of 'local' state.
+        let remoteState = try RemoteSyncListing.list(path: path, syncContext: syncContext)
+        let reconciliation = ListingReconciliation.reconcile(local: localState, remote: remoteState)
         
         // TODO make it skip files that can't be accessed locally eg they're being saved or something, eg mark them as 'skip this!', deal with them next time around?
         // TODO we *need* the watcher to get an accurate idea of local deletions.
@@ -25,85 +24,7 @@ enum FolderSyncOperation {
         // TODO for local deletions, think about how to model folder deletes, given that if we simply make `.deleted.DATE.FILENAME` in the same folder it'll be lost. Instead create 'FlareRoot/relevant/folder/here/.deleted.foo.filename ? And for sync deletions, *move* to same file?
         // TODO Or maybe on local deletion, create a .deleted.XFILENAME file which this'll then pick up and remove once synced.
         // TODO When sync deletes a file, move it to a 'deleted' folder eg yyyymmd_filename which gets nuked once >1mo.
-
-        // Create a list of every potential file.
-        var remotePlusLocalFiles: Set<String> = Set(localState.files.keys).union(remoteState.files.keys)
-        remotePlusLocalFiles.subtract(remoteState.filesToSkip)
-        remotePlusLocalFiles.subtract(localState.filesToSkip)
         
-        // Finally reconcile.
-        var actions: [SyncAction] = []
-        let oneMonthAgo = Date().addingTimeInterval(-30*24*60*60)
-        for file in remotePlusLocalFiles {
-            let localState = localState.files[file] ?? .missing
-            let remoteState = remoteState.files[file] ?? .missing
-            switch (localState, remoteState) {
-            case (.exists(let localDate, let localSize, let localSha1), .exists(let remoteDate, let remoteSize, let remoteSha1)):
-                // Do the 3 date comparisons: same/earlier/later:
-                if abs(localDate.timeIntervalSince(remoteDate)) < 1 { // Same date.
-                    if localSize == remoteSize {
-                        // Nothing to do, the sizes and dates are the same.
-                        // Don't bother comparing sha1's if both date and size are the same, we can't cover *every* edge case that'll ever occur, we're not going for 5 9's of reliability here, the time spent hashing everything outweighs that.
-                    } else if localSize > remoteSize { // Somehow dates match but local is bigger, so i assume bigger is better and upload.
-                        // No point looking at sha1's: if the sizes are different, the sha's will certainly be different.
-                        actions.append(.upload(file))
-                    } else { // Dates match but remote is bigger; bigger is better; download.
-                        actions.append(.download(file))
-                    }
-                } else if localDate > remoteDate {
-                    // TODO as an optimisation, if the hashes match, only need to 'touch' the remote file to mark it as synced.
-                    // This will mean that even if resyncing a folder, sha's will only be slowly recalculated once, to fix the dates.
-                    // Don't cap the file size when loading the local sha1, because it'll still be quicker than up/downloading!
-                    actions.append(.upload(file))
-                } else {
-                    // TODO as an optimisation, if the hashes match, only need to 'touch' the local file to mark it as synced.
-                    actions.append(.download(file))
-                }
-                
-            case (.exists(let localDate, _, _), .deleted(let remoteDate)):
-                if localDate > remoteDate {
-                    actions.append(.upload(file))
-                } else {
-                    actions.append(.deleteLocal(file))
-                }
-
-            case (.exists, .missing):
-                actions.append(.upload(file))
-                
-            case (.deleted(let localDate), .exists(let remoteDate, _, _)):
-                if localDate > remoteDate {
-                    actions.append(.deleteRemote(file))
-                } else {
-                    actions.append(.download(file))
-                }
-                
-            case (.deleted(let localDate), .deleted(let remoteDate)):
-                // Tidy up metadata so subsequent syncs are faster.
-                // Removing metadata is safe, because 'deletes' only happen if both sides have metadata.
-                if localDate < oneMonthAgo {
-                    actions.append(.clearLocalDeletedMetadata(file))
-                }
-                if remoteDate < oneMonthAgo {
-                    actions.append(.clearRemoteDeletedMetadata(file))
-                }
-                
-            case (.deleted(let localDate), .missing):
-                if localDate < oneMonthAgo {
-                    actions.append(.clearLocalDeletedMetadata(file))
-                }
-                
-            case (.missing, .exists):
-                actions.append(.download(file))
-                
-            case (.missing, .deleted(let remoteDate)):
-                if remoteDate < oneMonthAgo {
-                    actions.append(.clearRemoteDeletedMetadata(file))
-                }
-
-            case (.missing, .missing):
-                break // Shouldn't be possible.
-            }
-        }
         
         print("Actions:")
         print(actions)
@@ -112,8 +33,6 @@ enum FolderSyncOperation {
         // TODO when doing the actions, do the smallest files first for speed.
         // TODO if another notification comes in for this folder, then once finishing syncing the next file, restart the folder.
 
-        // TODO compare dates of subfolders, only run a reconciliation if different.
-        // Will bz give us a subfolder date that is bumped whenever a child file is changed?
-        return Array(subfolders).sorted()
+        return Array(reconciliation.subfolders).sorted()
     }
 }
