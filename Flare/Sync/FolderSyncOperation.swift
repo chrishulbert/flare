@@ -33,7 +33,6 @@ enum FolderSyncOperation {
         
         // Finally reconcile.
         var actions: [SyncAction] = []
-        // TODO remove all 'skip' files from above set.
         let oneMonthAgo = Date().addingTimeInterval(-30*24*60*60)
         for file in remotePlusLocalFiles {
             let localState = localState.files[file] ?? .missing
