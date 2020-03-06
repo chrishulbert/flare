@@ -27,9 +27,10 @@ enum SyncFileState {
 }
 
 extension ListFileVersionsFile {
+    static let fileInfoLastModifiedKey = "src_last_modified_millis"
     /// Grabs the 'last modified' date if it can (which is the time we specified a file was modified), otherwise uses the upload timestamp as a backup (which might be later).
     var lastModified: Date {
-        if let millis = fileInfo["src_last_modified_millis"] as? Int {
+        if let millis = fileInfo[Self.fileInfoLastModifiedKey] as? Int {
             return millis.asDate
         } else {
             return uploadTimestamp.asDate
