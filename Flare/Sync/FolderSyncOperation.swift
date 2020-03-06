@@ -24,35 +24,7 @@ enum FolderSyncOperation {
             throw Errors.nilAuthToken
         }
         
-        print("FolderSyncOperation: \(path ?? ">root<")")
-        let files = try ListAllLatestFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: path, delimiter: "/")
-
-        // Firstly collect a list of the 'remote' state.
-        // TODO ignore '.bzEmpty' eg empty folder - or is this only a created-by-web-ui thing?
-        var subfolders: Set<String> = []
-        var remoteStates: [String: SyncFileState] = [:]
-        for file in files {
-            guard let action = file.actionEnum else { continue }
-            switch action {
-            case .start:
-                // In progress, so don't touch anything - this file can be taken care of next time the sync runs.
-                print("Ignoring \(file.fileName) because it's an in-progress upload")
-                
-            case .upload:
-                // Skip if we have already encountered this file, because the first version record is the most recent one.
-                guard !remoteStates.keys.contains(file.fileName) else { continue }
-                remoteStates[file.fileName] = .exists(file.lastModified, file.contentLength, file.contentSha1)
-                
-            case .hide:
-                // Skip if we have already encountered this file, because the first version record is the most recent one.
-                guard !remoteStates.keys.contains(file.fileName) else { continue }
-                let when = file.uploadTimestamp.asDate // This is the time it was hidden from bz, not the time it was deleted off the local computer, so not ideal but is reasonable.
-                remoteStates[file.fileName] = .deleted(when)
-
-            case .folder: // Queue syncing subfolders.
-                subfolders.insert(file.fileName) // Add to a set of subfolders, along with local subfolders, so we don't add 2 operations for one folder.
-            }
-        }
+        let remoteState = try RemoteSyncListing.list(path: path, syncContext: syncContext)
         
         // Next collect a list of 'local' state.
         // Contents of directory doesn't return '._*' files eg ds store
