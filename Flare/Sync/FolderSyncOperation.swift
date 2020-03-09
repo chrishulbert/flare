@@ -25,12 +25,10 @@ enum FolderSyncOperation {
         // TODO Or maybe on local deletion, create a .deleted.XFILENAME file which this'll then pick up and remove once synced.
         // TODO When sync deletes a file, move it to a 'deleted' folder eg yyyymmd_filename which gets nuked once >1mo.
         
-        
         print("Actions:")
-        print(actions)
+        print(reconciliation.actions)
         print(" /actions")
 
-        // TODO when doing the actions, do the smallest files first for speed.
         // TODO if another notification comes in for this folder, then once finishing syncing the next file, restart the folder.
 
         return Array(reconciliation.subfolders).sorted()

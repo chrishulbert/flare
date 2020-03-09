@@ -68,13 +68,54 @@ extension FileManager {
     }
 }
 
-enum SyncAction {
-    case upload(String)
-    case download(String)
+enum SyncAction: Equatable {
+    case upload(String, Int) // Int = size.
+    case download(String, Int) // int = size
     case deleteLocal(String) // TODO rename to a hidden '.deleted.DATE.ORIGINAL_FILENAME' as a metadata thing, which gets deleted in a month.
     case deleteRemote(String)
     case clearLocalDeletedMetadata(String) // Delete '.deleted.*.ORIGINAL_FILENAME' with wildcard in case there are multiple deletions.
     case clearRemoteDeletedMetadata(String)
+}
+
+extension SyncAction: Comparable {
+    // Order the actions so the fastest things happen first.
+    var order: Int {
+        switch self {
+        case .deleteLocal:
+            return 1
+        case .clearLocalDeletedMetadata:
+            return 2
+        case .deleteRemote:
+            return 3
+        case .clearRemoteDeletedMetadata:
+            return 4
+        case .download:
+            return 5
+        case .upload:
+            return 6
+        }
+    }
+    
+    var size: Int {
+        switch self {
+        case .deleteLocal, .clearLocalDeletedMetadata, .deleteRemote, .clearRemoteDeletedMetadata:
+            return 0
+        case .download(_, let size):
+            return size
+        case .upload(_, let size):
+            return size
+        }
+    }
+    
+    static func < (lhs: SyncAction, rhs: SyncAction) -> Bool {
+        let orderL = lhs.order
+        let orderR = rhs.order
+        if orderL == orderR { // Same operation precedence, so compare sizes.
+            return lhs.size < rhs.size
+        } else {
+            return orderL < orderR
+        }
+    }
 }
 
 extension Data {

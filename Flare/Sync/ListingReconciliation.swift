@@ -14,7 +14,7 @@ struct ListingReconciliation {
 }
 
 extension ListingReconciliation {
-    /// Reconcile the two listings, figure out the necessary actions.
+    /// Reconcile the two listings, figure out the necessary actions. Returns them sorted such that quick actions will happen first.
     static func reconcile(local: LocalSyncListing, remote: RemoteSyncListing) -> ListingReconciliation {
         
         // Create a list of every potential file.
@@ -36,35 +36,35 @@ extension ListingReconciliation {
                         // Don't bother comparing sha1's if both date and size are the same, we can't cover *every* edge case that'll ever occur, we're not going for 5 9's of reliability here, the time spent hashing everything outweighs that.
                     } else if localSize > remoteSize { // Somehow dates match but local is bigger, so i assume bigger is better and upload.
                         // No point looking at sha1's: if the sizes are different, the sha's will certainly be different.
-                        actions.append(.upload(file))
+                        actions.append(.upload(file, localSize))
                     } else { // Dates match but remote is bigger; bigger is better; download.
-                        actions.append(.download(file))
+                        actions.append(.download(file, remoteSize))
                     }
                 } else if localDate > remoteDate {
                     // TODO as an optimisation, if the hashes match, only need to 'touch' the remote file to mark it as synced. Not sure if the Bz api allows this though.
                     // This will mean that even if resyncing a folder, sha's will only be slowly recalculated once, to fix the dates.
                     // Don't cap the file size when loading the local sha1, because it'll still be quicker than up/downloading!
-                    actions.append(.upload(file))
+                    actions.append(.upload(file, localSize))
                 } else {
                     // TODO as an optimisation, if the hashes match, only need to 'touch' the local file to mark it as synced.
-                    actions.append(.download(file))
+                    actions.append(.download(file, remoteSize))
                 }
                 
-            case (.exists(let localDate, _, _), .deleted(let remoteDate)):
+            case (.exists(let localDate, let localSize, _), .deleted(let remoteDate)):
                 if localDate > remoteDate {
-                    actions.append(.upload(file))
+                    actions.append(.upload(file, localSize))
                 } else {
                     actions.append(.deleteLocal(file))
                 }
 
-            case (.exists, .missing):
-                actions.append(.upload(file))
+            case (.exists(_, let localSize, _), .missing):
+                actions.append(.upload(file, localSize))
                 
-            case (.deleted(let localDate), .exists(let remoteDate, _, _)):
+            case (.deleted(let localDate), .exists(let remoteDate, let remoteSize, _)):
                 if localDate > remoteDate {
                     actions.append(.deleteRemote(file))
                 } else {
-                    actions.append(.download(file))
+                    actions.append(.download(file, remoteSize))
                 }
                 
             case (.deleted(let localDate), .deleted(let remoteDate)):
@@ -82,8 +82,8 @@ extension ListingReconciliation {
                     actions.append(.clearLocalDeletedMetadata(file))
                 }
                 
-            case (.missing, .exists):
-                actions.append(.download(file))
+            case (.missing, .exists(_, let remoteSize, _)):
+                actions.append(.download(file, remoteSize))
                 
             case (.missing, .deleted(let remoteDate)):
                 if remoteDate < oneMonthAgo {
@@ -110,6 +110,6 @@ extension ListingReconciliation {
             }
         }
         
-        return ListingReconciliation(actions: actions, subfolders: subfoldersNeedingAttention)
+        return ListingReconciliation(actions: actions.sorted(), subfolders: subfoldersNeedingAttention)
     }
 }

@@ -102,7 +102,6 @@ import Foundation
 
 //let witness = Witness(paths: [config.folder], flags: [.FileEvents, .IgnoreSelf], latency: 1) { events in
 //    // If a file is renamed, you get a 'renamed' event for both the old and new name.
-//    // TODO ignore .DS_Store
 //    print("file system events received:")
 //    for event in events {
 //        print(event)
@@ -115,51 +114,52 @@ func runAndThrow() throws {
     let syncContext = try SyncContext()
     let auth = try AuthorizeAccount.send(accountId: syncContext.config.accountId, applicationKey: syncContext.config.applicationKey)
     syncContext.authorizeAccountResponse = auth
-    let myData = "sdfgsdfgsdfg".data(using: .utf8)!
-
-    var files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: "foo/bar/", delimiter: "/")
-    print("---initial:---")
-    print(files)
-    print("------")
     
-    var uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
-    uploadParams = try Uploader.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "newfolder/blah.txt", file: myData, lastModified: Date())
-    files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: nil, delimiter: "/")
-    print("---after uploading blah.txt:---")
-    print(files)
-    print("------")
-
-    let past = Date().addingTimeInterval(-24*60*60)
-    uploadParams = try UploaderWithFolderModifications.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "foo/bar/yada/blah.txt", file: myData, lastModified: past)
-    
-    sleep(10)
-
-    uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
-    uploadParams = try Uploader.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "newfolder/yada.txt", file: myData, lastModified: Date())
-    files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: nil, delimiter: "/")
-    print("---after uploading yada.txt:---")
-    print(files)
-    print("------")
-
-    sleep(10)
-    
-    uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
-    uploadParams = try Uploader.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "newfolder/yada2.txt", file: myData, lastModified: Date())
-    files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: nil, delimiter: "/")
-    print("---after uploading yada2.txt:---")
-    print(files)
-    print("------")
-    
-    sleep(10)
-    
-    uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
-    uploadParams = try Uploader.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "newfolder/yada3.txt", file: myData, lastModified: Date())
-    files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: nil, delimiter: "/")
-    print("---after uploading yada3.txt:---")
-    print(files)
-    print("------")
-    
-    //try RecursiveFolderSyncOperation.sync(path: nil, syncContext: syncContext)
+//    let myData = "sdfgsdfgsdfg".data(using: .utf8)!
+//
+//    var files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: "foo/bar/", delimiter: "/")
+//    print("---initial:---")
+//    print(files)
+//    print("------")
+//
+//    var uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
+//    uploadParams = try Uploader.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "newfolder/blah.txt", file: myData, lastModified: Date())
+//    files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: nil, delimiter: "/")
+//    print("---after uploading blah.txt:---")
+//    print(files)
+//    print("------")
+//
+//    let past = Date().addingTimeInterval(-24*60*60)
+//    uploadParams = try UploaderWithFolderModifications.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "foo/bar/yada/blah.txt", file: myData, lastModified: past)
+//
+//    sleep(10)
+//
+//    uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
+//    uploadParams = try Uploader.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "newfolder/yada.txt", file: myData, lastModified: Date())
+//    files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: nil, delimiter: "/")
+//    print("---after uploading yada.txt:---")
+//    print(files)
+//    print("------")
+//
+//    sleep(10)
+//
+//    uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
+//    uploadParams = try Uploader.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "newfolder/yada2.txt", file: myData, lastModified: Date())
+//    files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: nil, delimiter: "/")
+//    print("---after uploading yada2.txt:---")
+//    print(files)
+//    print("------")
+//
+//    sleep(10)
+//
+//    uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
+//    uploadParams = try Uploader.upload(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, uploadParams: uploadParams, fileName: "newfolder/yada3.txt", file: myData, lastModified: Date())
+//    files = try ListAllFileVersions.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, prefix: nil, delimiter: "/")
+//    print("---after uploading yada3.txt:---")
+//    print(files)
+//    print("------")
+//
+    try RecursiveFolderSyncOperation.sync(path: nil, syncContext: syncContext)
 }
     
 // This wraps the throwing code, displaying errors and exiting appropriately.
