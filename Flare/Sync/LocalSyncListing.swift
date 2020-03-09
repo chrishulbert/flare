@@ -8,7 +8,7 @@
 
 import Foundation
 
-static let maxFileSize = 10*1024*1024 // Don't attempt to sync anything bigger than this.
+let maxFileSize = 10*1024*1024 // Don't attempt to sync anything bigger than this.
 
 /// This lets you get a local listing of files for sync purposes.
 struct LocalSyncListing {

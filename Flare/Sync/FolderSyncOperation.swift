@@ -11,26 +11,74 @@ import Foundation
 /// This syncs a single folder, and spawns ops for its subfolders.
 enum FolderSyncOperation {
     
+    enum Errors: Error {
+        case missingAuth
+        case nilDate
+    }
+    
     /// Path is nil for root folder, otherwise something like 'foo/bar/' with a trailing slash.
     /// Returns subfolders.
     static func sync(path: String?, syncContext: SyncContext) throws -> [String] {
+        guard let auth = syncContext.authorizeAccountResponse else { throw Errors.missingAuth }
+        
+        // Figure out what needs doing.
         let localState = try LocalSyncListing.list(path: path, syncContext: syncContext)
         let remoteState = try RemoteSyncListing.list(path: path, syncContext: syncContext)
         let reconciliation = ListingReconciliation.reconcile(local: localState, remote: remoteState)
         
+        // Now do it.
+        for action in reconciliation.actions {
+            print("Action: \(action)")
+            switch action {
+            case .upload(let path, _):
+                // Get upload params if necessary.
+                let uploadParams: UploadParams
+                if let up = syncContext.uploadParams {
+                    uploadParams = up
+                } else {
+                    uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
+                }
+                
+                // Get the last mod (grab it fresh rather than store it).
+                let rootUrl = URL(fileURLWithPath: syncContext.config.folder)
+                let fileUrl = rootUrl.appendingPathComponent(path)
+                let values = try fileUrl.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
+                guard let lastModified = values.contentModificationDate else { throw Errors.nilDate }
+                
+                // Get the data.
+                let data = try Data(contentsOf: fileUrl, options: [])
+                
+                // Upload.
+                syncContext.uploadParams = try UploaderWithFolderModifications.upload(token: auth.authorizationToken,
+                                                                                      apiUrl: auth.apiUrl,
+                                                                                      bucketId: syncContext.config.bucketId,
+                                                                                      uploadParams: uploadParams,
+                                                                                      fileName: path,
+                                                                                      file: data,
+                                                                                      lastModified: lastModified)
+                
+            case .download(let filename, _):
+                <#code#>
+            case .deleteLocal(let filename):
+                <#code#>
+            case .deleteRemote(let filename):
+                <#code#>
+            case .clearLocalDeletedMetadata(let filename):
+                <#code#>
+            case .clearRemoteDeletedMetadata(let filename):
+                <#code#>
+            }
+        }
+        
         // TODO make it skip files that can't be accessed locally eg they're being saved or something, eg mark them as 'skip this!', deal with them next time around?
-        // TODO we *need* the watcher to get an accurate idea of local deletions.
+        // TODO we *need* the watcher to get an accurate idea of local deletions? But even Dropbox works fine if you quit the app, do stuff, and restart, so it must not rely on watching?
         // TODO Maybe upon local deletion, we 'hide' remotely but don't even do a full sync or anything.
         // TODO for local deletions, think about how to model folder deletes, given that if we simply make `.deleted.DATE.FILENAME` in the same folder it'll be lost. Instead create 'FlareRoot/relevant/folder/here/.deleted.foo.filename ? And for sync deletions, *move* to same file?
         // TODO Or maybe on local deletion, create a .deleted.XFILENAME file which this'll then pick up and remove once synced.
         // TODO When sync deletes a file, move it to a 'deleted' folder eg yyyymmd_filename which gets nuked once >1mo.
-        
-        print("Actions:")
-        print(reconciliation.actions)
-        print(" /actions")
-
         // TODO if another notification comes in for this folder, then once finishing syncing the next file, restart the folder.
 
         return Array(reconciliation.subfolders).sorted()
     }
+
 }

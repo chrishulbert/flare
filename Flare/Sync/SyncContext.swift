@@ -12,6 +12,7 @@ import Foundation
 class SyncContext {
     let config: SyncConfig
     var authorizeAccountResponse: AuthorizeAccountResponse?
+    var uploadParams: UploadParams?
     
     init() throws {
         config = try .load()
