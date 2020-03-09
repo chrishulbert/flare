@@ -69,12 +69,28 @@ extension FileManager {
 }
 
 enum SyncAction: Equatable {
-    case upload(String, Int) // Int = size.
-    case download(String, Int) // int = size
-    case deleteLocal(String) // TODO rename to a hidden '.deleted.DATE.ORIGINAL_FILENAME' as a metadata thing, which gets deleted in a month.
+    case upload(String, Int) // Int = file size.
+    case download(String, Int)
+    case deleteLocal(String)
     case deleteRemote(String)
     case clearLocalDeletedMetadata(String) // Delete '.deleted.*.ORIGINAL_FILENAME' with wildcard in case there are multiple deletions.
-    case clearRemoteDeletedMetadata(String)
+}
+
+extension SyncAction {
+    var fileName: String {
+        switch self {
+        case .upload(let f, _):
+            return f
+        case .download(let f, _):
+            return f
+        case .deleteLocal(let f):
+            return f
+        case .deleteRemote(let f):
+            return f
+        case .clearLocalDeletedMetadata(let f):
+            return f
+        }
+    }
 }
 
 extension SyncAction: Comparable {
@@ -87,18 +103,16 @@ extension SyncAction: Comparable {
             return 2
         case .deleteRemote:
             return 3
-        case .clearRemoteDeletedMetadata:
-            return 4
         case .download:
-            return 5
+            return 4
         case .upload:
-            return 6
+            return 5
         }
     }
     
     var size: Int {
         switch self {
-        case .deleteLocal, .clearLocalDeletedMetadata, .deleteRemote, .clearRemoteDeletedMetadata:
+        case .deleteLocal, .clearLocalDeletedMetadata, .deleteRemote:
             return 0
         case .download(_, let size):
             return size

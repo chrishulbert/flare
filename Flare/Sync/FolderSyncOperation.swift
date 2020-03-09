@@ -27,10 +27,20 @@ enum FolderSyncOperation {
         let reconciliation = ListingReconciliation.reconcile(local: localState, remote: remoteState)
         
         // Now do it.
+        let rootUrl = URL(fileURLWithPath: syncContext.config.folder)
         for action in reconciliation.actions {
             print("Action: \(action)")
+            let fileName = action.fileName
+            let fileUrl = rootUrl.appendingPathComponent(action.fileName)
             switch action {
-            case .upload(let path, _):
+            case .upload:
+                // Get the last mod (grab it fresh rather than store it).
+                let values = try fileUrl.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
+                guard let lastModified = values.contentModificationDate else { throw Errors.nilDate }
+                
+                // Get the data.
+                let data = try Data(contentsOf: fileUrl, options: [])
+
                 // Get upload params if necessary.
                 let uploadParams: UploadParams
                 if let up = syncContext.uploadParams {
@@ -38,35 +48,29 @@ enum FolderSyncOperation {
                 } else {
                     uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
                 }
-                
-                // Get the last mod (grab it fresh rather than store it).
-                let rootUrl = URL(fileURLWithPath: syncContext.config.folder)
-                let fileUrl = rootUrl.appendingPathComponent(path)
-                let values = try fileUrl.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
-                guard let lastModified = values.contentModificationDate else { throw Errors.nilDate }
-                
-                // Get the data.
-                let data = try Data(contentsOf: fileUrl, options: [])
-                
+
                 // Upload.
                 syncContext.uploadParams = try UploaderWithFolderModifications.upload(token: auth.authorizationToken,
                                                                                       apiUrl: auth.apiUrl,
                                                                                       bucketId: syncContext.config.bucketId,
                                                                                       uploadParams: uploadParams,
-                                                                                      fileName: path,
+                                                                                      fileName: fileName,
                                                                                       file: data,
                                                                                       lastModified: lastModified)
                 
-            case .download(let filename, _):
-                <#code#>
-            case .deleteLocal(let filename):
-                <#code#>
-            case .deleteRemote(let filename):
-                <#code#>
-            case .clearLocalDeletedMetadata(let filename):
-                <#code#>
-            case .clearRemoteDeletedMetadata(let filename):
-                <#code#>
+            case .download:
+                break // TODO
+                
+            case .deleteLocal:  // TODO rename to a hidden '.deleted.DATE.ORIGINAL_FILENAME' as a metadata thing, which gets deleted in a month.
+                try FileManager.default.removeItem(at: fileUrl)
+
+            case .deleteRemote: // No need to do any 'deletion' metadata with this, because the Bz 'hide' does that for us.
+                try HideFile.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, fileName: fileName)
+
+            case .clearLocalDeletedMetadata:
+                // TODO Delete '.deleted.*.ORIGINAL_FILENAME' with wildcard in case there are multiple deletions.
+                break
+                
             }
         }
         

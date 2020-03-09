@@ -67,15 +67,14 @@ extension ListingReconciliation {
                     actions.append(.download(file, remoteSize))
                 }
                 
-            case (.deleted(let localDate), .deleted(let remoteDate)):
+            case (.deleted(let localDate), .deleted):
                 // Tidy up metadata so subsequent syncs are faster.
                 // Removing metadata is safe, because 'deletes' only happen if both sides have metadata.
                 if localDate < oneMonthAgo {
                     actions.append(.clearLocalDeletedMetadata(file))
                 }
-                if remoteDate < oneMonthAgo {
-                    actions.append(.clearRemoteDeletedMetadata(file))
-                }
+                // We don't remove remote metadata, because the Bz lifecycle rules auto-delete it for us after a configurable period, and there's no
+                // convenient API to manually do it anyway. There's delete_file_version but that makes the previous version active which could be wrong.
                 
             case (.deleted(let localDate), .missing):
                 if localDate < oneMonthAgo {
@@ -85,10 +84,9 @@ extension ListingReconciliation {
             case (.missing, .exists(_, let remoteSize, _)):
                 actions.append(.download(file, remoteSize))
                 
-            case (.missing, .deleted(let remoteDate)):
-                if remoteDate < oneMonthAgo {
-                    actions.append(.clearRemoteDeletedMetadata(file))
-                }
+            case (.missing, .deleted):
+                // Do nothing, because Bz lifecycle rules will remove the 'hidden' file soon enough: https://www.backblaze.com/b2/docs/lifecycle_rules.html
+                break
 
             case (.missing, .missing):
                 break // Shouldn't be possible.
