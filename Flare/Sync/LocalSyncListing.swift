@@ -8,6 +8,8 @@
 
 import Foundation
 
+static let maxFileSize = 10*1024*1024 // Don't attempt to sync anything bigger than this.
+
 /// This lets you get a local listing of files for sync purposes.
 struct LocalSyncListing {
     let files: [String: SyncFileState] // Key = filename.
@@ -25,7 +27,7 @@ extension LocalSyncListing {
     /// Path=nil for root folder.
     static func list(path: String?, syncContext: SyncContext) throws -> LocalSyncListing {
         var fileStates: [String: SyncFileState] = [:]
-        let filesToSkip: Set<String> = []
+        var filesToSkip: Set<String> = []
         var subfolders: [String: Date] = [:]
         let contents = try FileManager.default.myContents(ofDirectory: syncContext.pathUrl(path: path)) // Contents of directory doesn't return '._*' files eg ds store, which is helpful.
         let rootUrl = URL(fileURLWithPath: syncContext.config.folder)
@@ -39,7 +41,11 @@ extension LocalSyncListing {
                 subfolders[filePathRelativeToRoot] = contentModificationDate
             } else {
                 guard let fileSize = resourceValues.fileSize else { throw Errors.nilFileSize } // Can only get filesize if not a dir.
-                fileStates[filePathRelativeToRoot] = .exists(contentModificationDate, fileSize, nil)
+                if fileSize > maxFileSize {
+                    filesToSkip.insert(filePathRelativeToRoot) // Too big. TODO implement 'b2_upload_part' uploads.
+                } else {
+                    fileStates[filePathRelativeToRoot] = .exists(contentModificationDate, fileSize, nil)
+                }
             }
         }
         
