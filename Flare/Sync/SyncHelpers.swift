@@ -9,6 +9,10 @@
 
 import Foundation
 
+let fileInfoLastModifiedKey = "src_last_modified_millis"
+let bzHeaderLastModified = "X-Bz-Info-" + fileInfoLastModifiedKey
+let bzHeaderLastModifiedResponse = "x-bz-info-" + fileInfoLastModifiedKey
+
 extension SyncContext {
     func pathUrl(path: String?) -> URL {
         let root = URL(fileURLWithPath: config.folder)
@@ -27,10 +31,9 @@ enum SyncFileState {
 }
 
 extension ListFileVersionsFile {
-    static let fileInfoLastModifiedKey = "src_last_modified_millis"
     /// Grabs the 'last modified' date if it can (which is the time we specified a file was modified), otherwise uses the upload timestamp as a backup (which might be later).
     var lastModified: Date {
-        if let millis = fileInfo[Self.fileInfoLastModifiedKey] as? Int {
+        if let millis = fileInfo[fileInfoLastModifiedKey] as? Int {
             return millis.asDate
         } else {
             return uploadTimestamp.asDate
@@ -45,6 +48,10 @@ extension Int {
 }
 
 extension String {
+    var asInt: Int? {
+        return Int(self)
+    }
+    
     func deleting(prefix: String) -> String {
         guard self.hasPrefix(prefix) else { return self }
         return String(self.dropFirst(prefix.count))

@@ -53,8 +53,8 @@ extension ListFileVersionsFile {
     /// Copy self, but change the dates to use the dates from the other record.
     func file(withDatesFrom other: ListFileVersionsFile) -> ListFileVersionsFile {
         var mutatedInfo = fileInfo
-        if let otherLastMod = other.fileInfo[ListFileVersionsFile.fileInfoLastModifiedKey] {
-            mutatedInfo[ListFileVersionsFile.fileInfoLastModifiedKey] = otherLastMod
+        if let otherLastMod = other.fileInfo[fileInfoLastModifiedKey] {
+            mutatedInfo[fileInfoLastModifiedKey] = otherLastMod
         }
         return ListFileVersionsFile(accountId: accountId,
                                     action: action,

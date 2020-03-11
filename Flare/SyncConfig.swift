@@ -13,6 +13,7 @@ struct SyncConfig {
     let accountId: String
     let applicationKey: String
     let bucketId: String
+    let bucketName: String
     let folder: String // Eg "/Users/sam/Flare" - no trailing slash.
 }
 
@@ -24,6 +25,7 @@ extension SyncConfig {
         case accountIdMissing
         case applicationKeyMissing
         case bucketIdMissing
+        case bucketNameMissing
         case folderMissing
     }
     
@@ -50,9 +52,12 @@ extension SyncConfig {
         guard let bucketId = configJson["bucketId"] as? String else {
             throw Errors.bucketIdMissing
         }
+        guard let bucketName = configJson["bucketName"] as? String else {
+            throw Errors.bucketNameMissing
+        }
         guard let folder = configJson["folder"] as? String else {
             throw Errors.folderMissing
         }
-        return SyncConfig(key: key, accountId: accountId, applicationKey: applicationKey, bucketId: bucketId, folder: folder)
+        return SyncConfig(key: key, accountId: accountId, applicationKey: applicationKey, bucketId: bucketId, bucketName: bucketName, folder: folder)
     }
 }

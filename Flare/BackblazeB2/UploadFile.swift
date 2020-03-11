@@ -29,7 +29,7 @@ enum UploadFile {
             "Content-Type": "b2/x-auto",
             "Content-Length": String(file.count),
             "X-Bz-Content-Sha1": file.asSha1.asHexString,
-            "X-Bz-Info-src_last_modified_millis": lastModified.asBzString,
+            bzHeaderLastModified: lastModified.asBzString,
         ]
         _ = try Service.shared.postOrPutRaw(httpMethod: "POST", url: uploadUrl, body: file, headers: headers, token: token)
     }

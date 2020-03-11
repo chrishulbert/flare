@@ -159,6 +159,8 @@ func runAndThrow() throws {
 //    print(files)
 //    print("------")
 //
+//    try DownloadFileByName.send(token: syncContext.authorizeAccountResponse!.authorizationToken, bucketName: syncContext.config.bucketName, downloadUrl: syncContext.authorizeAccountResponse!.downloadUrl, fileName: "foo/bar/yada/blah.txt")
+    
     try RecursiveFolderSyncOperation.sync(path: nil, syncContext: syncContext)
 }
     

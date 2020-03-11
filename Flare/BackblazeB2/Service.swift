@@ -14,7 +14,7 @@ class Service {
     let session = URLSession(configuration: .ephemeral, delegate: nil, delegateQueue: nil) // Nil queue means it makes its own serial queue, so we don't block the current or main threads.
     
     /// GETs an endpoint. Token is the auth token.
-    func get(url: URL, token: String?, queryItems: [URLQueryItem] = [], timeoutInterval: TimeInterval? = nil) throws -> ([AnyHashable: Any], Data) {
+    func get(url: URL, token: String?, queryItems: [URLQueryItem] = [], timeoutInterval: TimeInterval? = nil) throws -> (Data, HTTPURLResponse) {
         guard var components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
             throw Errors.urlComponents
         }
@@ -23,7 +23,7 @@ class Service {
             throw Errors.urlComponents
         }
         let request = URLRequest.request(url: urlWithQuery, token: token, timeoutInterval: timeoutInterval)
-        return try make(request: request)
+        return try makeRaw(request: request)
     }
     
     /// POST (eg insert) or PUT (eg update) to a backend endpoint.
@@ -55,9 +55,8 @@ class Service {
     }
     
     /// Helper for making get/post requests to the backend.
-    /// This parses the json response.
     /// This throws Errors.not200 on non-200s.
-    func make(request: URLRequest) throws -> ([AnyHashable: Any], Data) {
+    func makeRaw(request: URLRequest) throws -> (Data, HTTPURLResponse) {
         let (data, response) = try session.dataTaskSync(request: request)
         #if DEBUG
         if let s = data.asString { print(s) }
@@ -68,6 +67,12 @@ class Service {
             let message = json?["message"] as? String // eg "Invalid bucketId: 967fa9f24082154465d30c12x"
             throw Errors.not200(response.statusCode, code, message)
         }
+        return (data, response)
+    }
+    
+    /// This parses the json response.
+    func make(request: URLRequest) throws -> ([AnyHashable: Any], Data) {
+        let (data, _) = try makeRaw(request: request)
         guard let json = data.asJson else {
             throw Errors.couldNotParseJson
         }
