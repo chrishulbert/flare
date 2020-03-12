@@ -59,13 +59,19 @@ enum FolderSyncOperation {
                                                                                       lastModified: lastModified)
                 
             case .download:
-                let (data, lastModO) = try DownloadFileByName.send(token: auth.authorizationToken, bucketName: syncContext.config.bucketId, downloadUrl: auth.downloadUrl, fileName: fileName)
+                let (data, lastModO) = try DownloadFileByName.send(token: auth.authorizationToken, bucketName: syncContext.config.bucketName, downloadUrl: auth.downloadUrl, fileName: fileName)
                 let lastMod = lastModO ?? Date() // Default to today if somehow missing.
-                FileManager.default.createDirectory(at: <#T##URL#>, withIntermediateDirectories: <#T##Bool#>, attributes: [.modificationDate : lastMod]?)
-                // TODO make folders
-                // TODO save file
-                // TODO set its last mod date at the same time
-//                xx
+                let folder = fileUrl.deletingLastPathComponent()
+                try FileManager.default.createDirectory(at: folder,
+                                                        withIntermediateDirectories: true,
+                                                        attributes: [.modificationDate: lastMod])
+                FileManager.default.createFile(atPath: fileUrl.path,
+                                               contents: data,
+                                               attributes: [.modificationDate: lastMod])
+                // TODO it 'touches' the date of the folder
+                // TODO look into why grandparent folders don't get dates touched. Or do they, and finder is just slow to update? Check in terminal.
+                // TODO will the above be a big problem?
+                // TODO why is it downloading files that match?
                 
             case .deleteLocal:  // TODO rename to a hidden '.deleted.DATE.ORIGINAL_FILENAME' as a metadata thing, which gets deleted in a month.
                 try FileManager.default.removeItem(at: fileUrl)
