@@ -35,6 +35,8 @@ extension ListFileVersionsFile {
     var lastModified: Date {
         if let millis = fileInfo[fileInfoLastModifiedKey] as? Int {
             return millis.asDate
+        } else if let millis = (fileInfo[fileInfoLastModifiedKey] as? String)?.asInt {
+            return millis.asDate
         } else {
             return uploadTimestamp.asDate
         }

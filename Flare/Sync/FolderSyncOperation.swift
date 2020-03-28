@@ -65,13 +65,12 @@ enum FolderSyncOperation {
                 try FileManager.default.createDirectory(at: folder,
                                                         withIntermediateDirectories: true,
                                                         attributes: [.modificationDate: lastMod])
+                // I've tested and verified that this will push the last mod date back if this overwrites a file.
                 FileManager.default.createFile(atPath: fileUrl.path,
                                                contents: data,
                                                attributes: [.modificationDate: lastMod])
+                // macOS touches folder dates by adding .dsstore i think
                 // TODO it 'touches' the date of the folder
-                // TODO look into why grandparent folders don't get dates touched. Or do they, and finder is just slow to update? Check in terminal.
-                // TODO will the above be a big problem?
-                // TODO why is it downloading files that match?
                 
             case .deleteLocal:  // TODO rename to a hidden '.deleted.DATE.ORIGINAL_FILENAME' as a metadata thing, which gets deleted in a month.
                 try FileManager.default.removeItem(at: fileUrl)
@@ -82,7 +81,6 @@ enum FolderSyncOperation {
             case .clearLocalDeletedMetadata:
                 // TODO Delete '.deleted.*.ORIGINAL_FILENAME' with wildcard in case there are multiple deletions.
                 break
-                
             }
         }
         

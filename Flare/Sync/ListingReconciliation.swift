@@ -30,7 +30,7 @@ extension ListingReconciliation {
             switch (localState, remoteState) {
             case (.exists(let localDate, let localSize, _ /*let localSha1*/), .exists(let remoteDate, let remoteSize, _ /* let remoteSha1*/)):
                 // Do the 3 date comparisons: same/earlier/later:
-                if abs(localDate.timeIntervalSince(remoteDate)) < 1 { // Same date.
+                if abs(localDate.timeIntervalSince(remoteDate)) < 2 { // Same date. Rough time comparison.
                     if localSize == remoteSize {
                         // Nothing to do, the sizes and dates are the same.
                         // Don't bother comparing sha1's if both date and size are the same, we can't cover *every* edge case that'll ever occur, we're not going for 5 9's of reliability here, the time spent hashing everything outweighs that.
@@ -94,13 +94,14 @@ extension ListingReconciliation {
         }
         
         // Reconcile the subfolders.
+        // TODO local folders will be touched when the .DS_Store is added, so some way to push that date up to the server would mean future syncs can skip the folder.
         var subfoldersNeedingAttention: Set<String> = []
         let allSubfolders: Set<String> = Set(local.subfolders.keys).union(remote.subfolders.keys)
         for subfolder in allSubfolders {
             if let localDate = local.subfolders[subfolder],
                 let remoteDate = remote.subfolders[subfolder] {
                 // Exists in both places, so compare dates.
-                if abs(localDate.timeIntervalSince(remoteDate)) > 1 { // Different date.
+                if abs(localDate.timeIntervalSince(remoteDate)) > 2 { // Different date.
                     subfoldersNeedingAttention.insert(subfolder)
                 }
             } else { // Subfolder only appears in one of local/remote, so needs syncing.
