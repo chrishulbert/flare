@@ -94,7 +94,7 @@ extension ListingReconciliation {
         }
         
         // Reconcile the subfolders.
-        // TODO local folders will be touched when the .DS_Store is added, so some way to push that date up to the server would mean future syncs can skip the folder.
+         TODO local folders will be touched when the .DS_Store is added, so some way to push that date up to the server would mean future syncs can skip the folder.
         var subfoldersNeedingAttention: Set<String> = []
         let allSubfolders: Set<String> = Set(local.subfolders.keys).union(remote.subfolders.keys)
         for subfolder in allSubfolders {

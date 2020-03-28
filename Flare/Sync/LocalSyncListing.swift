@@ -29,6 +29,7 @@ extension LocalSyncListing {
         var fileStates: [String: SyncFileState] = [:]
         var filesToSkip: Set<String> = []
         var subfolders: [String: Date] = [:]
+        TODO this seems to be skipping .bzempty? Should we simply not support dot files?
         let contents = try FileManager.default.myContents(ofDirectory: syncContext.pathUrl(path: path)) // Contents of directory doesn't return '._*' files eg ds store, which is helpful.
         let rootUrl = URL(fileURLWithPath: syncContext.config.folder)
         for file in contents {

@@ -27,12 +27,14 @@ enum ListAllLatestFileVersions {
             }
         }
         
-        // Find ones with matching last modified entries, and apply the dates across.
+        // TODO handle folders that have no .bzlastmodified somehow, eg make their dates optional.
+        
+        // Find ones (eg folders) with matching last modified entries, and apply the dates across.
         // This is a workaround for Bz not having folder modification dates.
         for (fileName, details) in fileNamesToDetails {
             guard let action = details.actionEnum else { continue }
             guard action == .folder else { continue }
-            let lastModFilename = fileName + lastModifiedPlaceholderPrefix
+            let lastModFilename = fileName.withTrailingSlashRemoved + lastModifiedPlaceholderPrefix
             guard let lastModDetails = fileNamesToDetails[lastModFilename] else { continue }
             fileNamesToDetails[fileName] = details.file(withDatesFrom: lastModDetails)
         }
@@ -46,6 +48,18 @@ enum ListAllLatestFileVersions {
         }
         
         return Array(fileNamesToDetails.values)
+    }
+}
+
+extension String {
+    var withTrailingSlashRemoved: String {
+        if self.hasSuffix("/") {
+            var temp = self
+            _ = temp.popLast()
+            return temp
+        } else {
+            return self
+        }
     }
 }
 
