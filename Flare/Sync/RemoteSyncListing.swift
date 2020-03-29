@@ -39,6 +39,7 @@ extension RemoteSyncListing {
         var subfolders: [String: Date] = [:]
         for file in files {
             guard let action = file.actionEnum else { continue }
+            guard !file.fileName.isHiddenFile else { continue } // Skip hidden files, to match myContents(ofDirectory which also skips hidden files.
             switch action {
             case .start:
                 // In progress, so don't touch anything - this file can be taken care of next time the sync runs.
@@ -59,4 +60,14 @@ extension RemoteSyncListing {
         return RemoteSyncListing(files: fileStates, filesToSkip: filesToSkip, subfolders: subfolders)
     }
 
+}
+
+extension String {
+    /// Checks if the last component is hidden (starts with .), eg:
+    /// a/b/c/d/.bzEmpty - would be hidden.
+    var isHiddenFile: Bool {
+        let comps = components(separatedBy: "/")
+        guard let last = comps.last else { return false }
+        return last.hasPrefix(".")
+    }
 }

@@ -55,6 +55,7 @@
 		83104A2323C319AB00D02EB2 /* SyncHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncHelpers.swift; sourceTree = "<group>"; };
 		83104A2523C3222500D02EB2 /* RecursiveFolderSyncOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecursiveFolderSyncOperation.swift; sourceTree = "<group>"; };
 		83186B9123E82BC40011A09C /* ListFileNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListFileNames.swift; sourceTree = "<group>"; };
+		831B41A82430953E00CCCEC1 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		831D439E23E6D30100433118 /* GetFileInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetFileInfo.swift; sourceTree = "<group>"; };
 		83672EED233787DA00CAF32A /* GetUploadUrl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetUploadUrl.swift; sourceTree = "<group>"; };
 		836B352E2330B1EC00E4B0C2 /* HideFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HideFile.swift; sourceTree = "<group>"; };
@@ -163,6 +164,7 @@
 		83F27B47231CDA5F006ADDC9 = {
 			isa = PBXGroup;
 			children = (
+				831B41A82430953E00CCCEC1 /* README.md */,
 				83F27B52231CDA5F006ADDC9 /* Flare */,
 				83F27B51231CDA5F006ADDC9 /* Products */,
 				838810DF233CB65700C90D11 /* Frameworks */,
