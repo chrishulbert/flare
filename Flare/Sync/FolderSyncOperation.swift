@@ -17,8 +17,13 @@ enum FolderSyncOperation {
     }
     
     /// Path is nil for root folder, otherwise something like 'foo/bar/' with a trailing slash.
+    /// Last mod dates are used to 'touch' the folders after all the files are taken into account,
+    /// so that next time it runs a sync it can skip this folder. This solves for .DS_Store problem bumping
+    /// a folder's date even though no non-hidden files are affected.
+    /// If content files are newer than the folder last mod itself (somehow) then it will choose the later date.
+    /// Folder last mods can be nil if it's the root folder.
     /// Returns subfolders.
-    static func sync(path: String?, syncContext: SyncContext) throws -> [String] {
+    static func sync(path: String?, localLastModified: Date?, remoteLastModified: Date?, syncContext: SyncContext) throws -> [ListingRecSubfolder] {
         guard let auth = syncContext.authorizeAccountResponse else { throw Errors.missingAuth }
         
         // Figure out what needs doing.
@@ -92,7 +97,7 @@ enum FolderSyncOperation {
         // TODO When sync deletes a file, move it to a 'deleted' folder eg yyyymmd_filename which gets nuked once >1mo.
         // TODO if another notification comes in for this folder, then once finishing syncing the next file, restart the folder.
 
-        return Array(reconciliation.subfolders).sorted()
+        return reconciliation.subfolders
     }
 
 }

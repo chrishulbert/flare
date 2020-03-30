@@ -8,9 +8,15 @@
 
 import Foundation
 
+struct ListingRecSubfolder {
+    let subfolder: String
+    let localLastModified: Date?
+    let remoteLastModified: Date?
+}
+
 struct ListingReconciliation {
     let actions: [SyncAction]
-    let subfolders: Set<String> // Subfolders with different dates.
+    let subfolders: [ListingRecSubfolder] // Subfolders with different dates.
 }
 
 extension ListingReconciliation {
@@ -93,19 +99,31 @@ extension ListingReconciliation {
             }
         }
         
+        // TODO set remote folder date to match local folder date, not just the newest date of the contained filesxx
         // Reconcile the subfolders.
-         TODO local folders will be touched when the .DS_Store is added, so some way to push that date up to the server would mean future syncs can skip the folder.
-        var subfoldersNeedingAttention: Set<String> = []
-        let allSubfolders: Set<String> = Set(local.subfolders.keys).union(remote.subfolders.keys)
+        // TODO local folders will be touched when the .DS_Store is added, so some way to push that date up to the server would mean future syncs can skip the folder.xx
+        var subfoldersNeedingAttention: [ListingRecSubfolder] = []
+        let allSubfoldersSet: Set<String> = Set(local.subfolders.keys).union(remote.subfolders.keys)
+        let allSubfolders = allSubfoldersSet.sorted()
         for subfolder in allSubfolders {
-            if let localDate = local.subfolders[subfolder],
-                let remoteDate = remote.subfolders[subfolder] {
+            let localDate = local.subfolders[subfolder]
+            let remoteDate = remote.subfolders[subfolder]
+            if let localDate = localDate, let remoteDate = remoteDate {
                 // Exists in both places, so compare dates.
                 if abs(localDate.timeIntervalSince(remoteDate)) > 2 { // Different date.
-                    subfoldersNeedingAttention.insert(subfolder)
+                    print("-s,l,r-")
+                    dump(subfolder)
+                    dump(localDate)
+                    dump(remoteDate)
+                    print("-")
+                    subfoldersNeedingAttention.append(ListingRecSubfolder(subfolder: subfolder,
+                                                                          localLastModified: localDate,
+                                                                          remoteLastModified: remoteDate))
                 }
             } else { // Subfolder only appears in one of local/remote, so needs syncing.
-                subfoldersNeedingAttention.insert(subfolder)
+                subfoldersNeedingAttention.append(ListingRecSubfolder(subfolder: subfolder,
+                                                                      localLastModified: localDate,
+                                                                      remoteLastModified: remoteDate))
             }
         }
         

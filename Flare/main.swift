@@ -161,7 +161,7 @@ func runAndThrow() throws {
 //
 //    try DownloadFileByName.send(token: syncContext.authorizeAccountResponse!.authorizationToken, bucketName: syncContext.config.bucketName, downloadUrl: syncContext.authorizeAccountResponse!.downloadUrl, fileName: "foo/bar/yada/blah.txt")
     
-    try RecursiveFolderSyncOperation.sync(path: nil, syncContext: syncContext)
+    try RecursiveFolderSyncOperation.sync(path: nil, localLastModified: nil, remoteLastModified: nil, syncContext: syncContext)
 }
     
 // This wraps the throwing code, displaying errors and exiting appropriately.
