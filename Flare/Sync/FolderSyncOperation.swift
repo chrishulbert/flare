@@ -74,8 +74,6 @@ enum FolderSyncOperation {
                 FileManager.default.createFile(atPath: fileUrl.path,
                                                contents: data,
                                                attributes: [.modificationDate: lastMod])
-                // macOS touches folder dates by adding .dsstore i think
-                // TODO it 'touches' the date of the folder
                 
             case .deleteLocal:  // TODO rename to a hidden '.deleted.DATE.ORIGINAL_FILENAME' as a metadata thing, which gets deleted in a month.
                 try FileManager.default.removeItem(at: fileUrl)
@@ -86,6 +84,17 @@ enum FolderSyncOperation {
             case .clearLocalDeletedMetadata:
                 // TODO Delete '.deleted.*.ORIGINAL_FILENAME' with wildcard in case there are multiple deletions.
                 break
+            }
+        }
+        
+        // After completing the files, bump the 'last modified' of the folders (if we have a date for either).
+        if let newerLastModified = newerDate(localLastModified: localLastModified, remoteLastModified: remoteLastModified) {
+            if shouldBump(localOrRemote: localLastModified, newerLastMod: newerLastModified) {
+                // Bump local
+            }
+            if shouldBump(localOrRemote: remoteLastModified, newerLastMod: newerLastModified) {
+                // Bump remote
+                
             }
         }
         
@@ -100,4 +109,25 @@ enum FolderSyncOperation {
         return reconciliation.subfolders
     }
 
+}
+
+/// Returns the newer of the two dates, or nil if both are nil.
+func newerDate(localLastModified: Date?, remoteLastModified: Date?) -> Date? {
+    if let l = localLastModified, let r = remoteLastModified {
+        let m = max(l.timeIntervalSinceReferenceDate, r.timeIntervalSinceReferenceDate)
+        return Date(timeIntervalSinceReferenceDate: m)
+    } else if let lastModified = localLastModified {
+        return lastModified
+    } else if let lastModified = remoteLastModified {
+        return lastModified
+    } else {
+        return nil
+    }
+}
+
+/// Returns true if newerLastMod is >1s newer than localOrRemote. Also true if localOrRemote doesn't have a date.
+/// Checks if localOrRemote needs bumping, basically.
+func shouldBump(localOrRemote: Date?, newerLastMod: Date) -> Bool {
+    guard let localOrRemote = localOrRemote else { return true }
+    return newerLastMod.timeIntervalSinceReferenceDate > localOrRemote.timeIntervalSinceReferenceDate+1
 }
