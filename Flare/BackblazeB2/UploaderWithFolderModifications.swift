@@ -10,7 +10,7 @@ import Foundation
 
 let lastModifiedPlaceholderPrefix = ".bzlastmodified"
 
-// TODO if we're uploading 10 files, 10 folders deep, this will touch a .bzlastmodified 100 times. Find some way to combine those.
+// TODO if we're uploading 10 files, 10 folders deep, this will touch a .bzlastmodified 100 times. Find some way to combine those. Or just highlight it in the readme as the result of limitations of the Bz API.
 
 /*
  As a workaround to bz not giving us 'lastmodified' on folders, this gives us:
@@ -50,21 +50,45 @@ enum UploaderWithFolderModifications {
     /// This wraps Uploader and walks up the tree and touches '.lastmodified' folders to suit.
     /// These are parallel to the actual folder, not children, so it doesn't have to fetch the folders files to know its last mod.
     static func upload(token: String, apiUrl: String, bucketId: String, uploadParams: UploadParams, fileName: String, file: Data, lastModified: Date) throws -> UploadParams {
-        var params = try Uploader.upload(token: token, apiUrl: apiUrl, bucketId: bucketId, uploadParams: uploadParams, fileName: fileName, file: file, lastModified: lastModified)
-        for folder in folders(fromFile: fileName) {
-            params = try touchLastModified(token: token, apiUrl: apiUrl, bucketId: bucketId, fileName: folder + lastModifiedPlaceholderPrefix, lastModified: lastModified, uploadParams: params)
+        let paramsAfterUpload = try Uploader.upload(token: token,
+                                                    apiUrl: apiUrl,
+                                                    bucketId: bucketId,
+                                                    uploadParams: uploadParams,
+                                                    fileName: fileName,
+                                                    file: file,
+                                                    lastModified: lastModified)
+        let paramsAfterTouch = try touch(fromFileOrFolderWithTrailingSlash: fileName,
+                                         lastModified: lastModified,
+                                         token: token,
+                                         apiUrl: apiUrl,
+                                         bucketId: bucketId,
+                                         uploadParams: paramsAfterUpload)
+        return paramsAfterTouch
+    }
+    
+    /// This touches a folder and its subfolders.
+    static func touch(fromFileOrFolderWithTrailingSlash f: String, lastModified: Date, token: String, apiUrl: String, bucketId: String, uploadParams: UploadParams) throws -> UploadParams {
+        var params = uploadParams
+        for folder in folders(fromFileOrFolderWithTrailingSlash: f) {
+            params = try touchLastModified(token: token,
+                                           apiUrl: apiUrl,
+                                           bucketId: bucketId,
+                                           fileName: folder + lastModifiedPlaceholderPrefix,
+                                           lastModified: lastModified,
+                                           uploadParams: params)
         }
         return params
     }
         
     /// Converts eg 'foo/bar/blah.txt' to ['foo', 'foo/bar']. Root files return []
-    private static func folders(fromFile: String) -> [String] {
-        let components = fromFile.components(separatedBy: "/")
+    /// This also works if you pass in a folder with a trailing slash, eg 'foo/bar/' gives 'foo', 'foo/bar'
+    private static func folders(fromFileOrFolderWithTrailingSlash f: String) -> [String] {
+        let components = f.components(separatedBy: "/")
         return (1..<components.count).map {
             components.prefix($0).joined(separator: "/")
         }
     }
-    
+        
     /// Touch the file so it's last modified put forward, but not set back, to the given date.
     private static func touchLastModified(token: String, apiUrl: String, bucketId: String, fileName: String, lastModified: Date, uploadParams: UploadParams) throws -> UploadParams {
         let names = try ListFileNames.send(token: token, apiUrl: apiUrl, bucketId: bucketId, startFileName: fileName, maxFileCount: 1, prefix: fileName, delimiter: nil)
