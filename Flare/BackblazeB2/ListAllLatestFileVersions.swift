@@ -29,6 +29,9 @@ enum ListAllLatestFileVersions {
         
         // TODO handle folders that have no .bzlastmodified somehow, eg make their dates optional.
         
+        TODO if you find a .bzlastmodified but no corresponding folder, create the folder, so that if we have an empty file it doesn't try to re-sync it endlessly.
+        eg change the below for loop to search for the bzlastmod first, not the folder first.
+        
         // Find ones (eg folders) with matching last modified entries, and apply the dates across.
         // This is a workaround for Bz not having folder modification dates.
         for (fileName, details) in fileNamesToDetails {

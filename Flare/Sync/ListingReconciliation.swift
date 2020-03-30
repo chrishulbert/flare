@@ -111,16 +111,27 @@ extension ListingReconciliation {
             if let localDate = localDate, let remoteDate = remoteDate {
                 // Exists in both places, so compare dates.
                 if abs(localDate.timeIntervalSince(remoteDate)) > 2 { // Different date.
-                    print("-s,l,r-")
-                    dump(subfolder)
-                    dump(localDate)
-                    dump(remoteDate)
+                    print("-s,l,r-") // TODO remove these prints
+                    let f = DateFormatter()
+                    f.dateStyle = .full
+                    f.timeStyle = .full
+                    print(subfolder)
+                    print("l:" + f.string(from: localDate))
+                    print("r:" + f.string(from: remoteDate))
                     print("-")
                     subfoldersNeedingAttention.append(ListingRecSubfolder(subfolder: subfolder,
                                                                           localLastModified: localDate,
                                                                           remoteLastModified: remoteDate))
                 }
             } else { // Subfolder only appears in one of local/remote, so needs syncing.
+                print("-s only in one of local/remote-") // TODO remove these prints
+                let f = DateFormatter()
+                f.dateStyle = .full
+                f.timeStyle = .full
+                print(subfolder)
+                if let date = localDate  { print("l:" + f.string(from: date)) }
+                if let date = remoteDate { print("r:" + f.string(from: date)) }
+                print("-")
                 subfoldersNeedingAttention.append(ListingRecSubfolder(subfolder: subfolder,
                                                                       localLastModified: localDate,
                                                                       remoteLastModified: remoteDate))
