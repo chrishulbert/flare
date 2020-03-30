@@ -13,6 +13,7 @@ enum FolderSyncOperation {
     
     enum Errors: Error {
         case missingAuth
+        case missingUploadParams
         case nilDate
     }
     
@@ -23,6 +24,7 @@ enum FolderSyncOperation {
     /// If content files are newer than the folder last mod itself (somehow) then it will choose the later date.
     /// Folder last mods can be nil if it's the root folder.
     /// Returns subfolders.
+    /// This assumes that the sync context upload params has been set already.
     static func sync(path: String?, localLastModified: Date?, remoteLastModified: Date?, syncContext: SyncContext) throws -> [ListingRecSubfolder] {
         guard let auth = syncContext.authorizeAccountResponse else { throw Errors.missingAuth }
         
@@ -46,13 +48,8 @@ enum FolderSyncOperation {
                 // Get the data.
                 let data = try Data(contentsOf: fileUrl, options: [])
 
-                // Get upload params if necessary.
-                let uploadParams: UploadParams
-                if let up = syncContext.uploadParams {
-                    uploadParams = up
-                } else {
-                    uploadParams = try GetUploadUrl.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId)
-                }
+                // Pull upload params from context.
+                guard let uploadParams = syncContext.uploadParams else { throw Errors.missingUploadParams }
 
                 // Upload.
                 syncContext.uploadParams = try UploaderWithFolderModifications.upload(token: auth.authorizationToken,
@@ -88,13 +85,29 @@ enum FolderSyncOperation {
         }
         
         // After completing the files, bump the 'last modified' of the folders (if we have a date for either).
-        if let newerLastModified = newerDate(localLastModified: localLastModified, remoteLastModified: remoteLastModified) {
+        if let path = path,
+            let newerLastModified = newerDate(localLastModified: localLastModified,
+                                              remoteLastModified: remoteLastModified) {
             if shouldBump(localOrRemote: localLastModified, newerLastMod: newerLastModified) {
-                // Bump local
+                // Bump local.
+                // Simplest way to do this is to create and remove a file, unfortunately Foundation doesn't give a better way.
+                // Unfortunately, this does not respect the supplied modification date, instead it sets the dates to 'now'. TODO find a better solution than this.
+                let url = URL(fileURLWithPath: syncContext.config.folder).appendingPathComponent(path).appendingPathComponent(".flareTempTouchLastModified")
+                print(url.path)
+                FileManager.default.createFile(atPath: url.path,
+                                               contents: Data(),
+                                               attributes: [.modificationDate: newerLastModified])
+                try FileManager.default.removeItem(at: url)
             }
             if shouldBump(localOrRemote: remoteLastModified, newerLastMod: newerLastModified) {
-                // Bump remote
-                
+                // Bump remote.
+                guard let uploadParams = syncContext.uploadParams else { throw Errors.missingUploadParams }
+                syncContext.uploadParams = try UploaderWithFolderModifications.touch(fromFileOrFolderWithTrailingSlash: path,
+                                                                                     lastModified: newerLastModified,
+                                                                                     token: auth.authorizationToken,
+                                                                                     apiUrl: auth.apiUrl,
+                                                                                     bucketId: syncContext.config.bucketId,
+                                                                                     uploadParams: uploadParams)
             }
         }
         

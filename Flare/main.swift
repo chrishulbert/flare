@@ -114,6 +114,9 @@ func runAndThrow() throws {
     let syncContext = try SyncContext()
     let auth = try AuthorizeAccount.send(accountId: syncContext.config.accountId, applicationKey: syncContext.config.applicationKey)
     syncContext.authorizeAccountResponse = auth
+    syncContext.uploadParams = try GetUploadUrl.send(token: auth.authorizationToken,
+                                                     apiUrl: auth.apiUrl,
+                                                     bucketId: syncContext.config.bucketId)
     
 //    let myData = "sdfgsdfgsdfg".data(using: .utf8)!
 //
