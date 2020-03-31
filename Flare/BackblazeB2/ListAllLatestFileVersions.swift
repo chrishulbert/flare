@@ -29,24 +29,27 @@ enum ListAllLatestFileVersions {
         
         // TODO handle folders that have no .bzlastmodified somehow, eg make their dates optional.
         
-        TODO if you find a .bzlastmodified but no corresponding folder, create the folder, so that if we have an empty file it doesn't try to re-sync it endlessly.
-        eg change the below for loop to search for the bzlastmod first, not the folder first.
-        
         // Find ones (eg folders) with matching last modified entries, and apply the dates across.
         // This is a workaround for Bz not having folder modification dates.
+        var lastModFilesToRemove: [String] = []
         for (fileName, details) in fileNamesToDetails {
-            guard let action = details.actionEnum else { continue }
-            guard action == .folder else { continue }
-            let lastModFilename = fileName.withTrailingSlashRemoved + lastModifiedPlaceholderPrefix
-            guard let lastModDetails = fileNamesToDetails[lastModFilename] else { continue }
-            fileNamesToDetails[fileName] = details.file(withDatesFrom: lastModDetails)
+            guard fileName.hasSuffix(lastModifiedPlaceholderPrefix) else { continue }
+            lastModFilesToRemove.append(fileName)
+            
+            // Convert from "foo.bzlastmodified" to "foo/" (because bz folders have trailing slashes whereas files don't, because reasons).
+            var sourceFolder = fileName
+            sourceFolder.removeLast(lastModifiedPlaceholderPrefix.count)
+            sourceFolder.append("/")
+            
+            if let sourceFolderDetails = fileNamesToDetails[sourceFolder] {
+                fileNamesToDetails[sourceFolder] = sourceFolderDetails.file(withDatesFrom: details)
+            } else { // Add the folder. This edge case happens when a folder is empty.
+                fileNamesToDetails[sourceFolder] = .folder(withDatesFrom: details, fileName: sourceFolder)
+            }
         }
         
         // Remove last modified entries.
-        let lastModFiles = fileNamesToDetails.keys.compactMap({
-            return $0.hasSuffix(lastModifiedPlaceholderPrefix) ? $0 : nil
-        })
-        for file in lastModFiles {
+        for file in lastModFilesToRemove {
             fileNamesToDetails.removeValue(forKey: file)
         }
         
@@ -81,6 +84,20 @@ extension ListFileVersionsFile {
                                     contentType: contentType,
                                     fileId: fileId,
                                     fileInfo: mutatedInfo,
+                                    fileName: fileName,
+                                    uploadTimestamp: other.uploadTimestamp)
+    }
+    
+    /// Creates a folder record using another's dates.
+    static func folder(withDatesFrom other: ListFileVersionsFile, fileName: String) -> ListFileVersionsFile {
+        return ListFileVersionsFile(accountId: "",
+                                    action: Action.folder.rawValue,
+                                    bucketId: "",
+                                    contentLength: 0,
+                                    contentSha1: nil,
+                                    contentType: nil,
+                                    fileId: nil,
+                                    fileInfo: other.fileInfo,
                                     fileName: fileName,
                                     uploadTimestamp: other.uploadTimestamp)
     }
