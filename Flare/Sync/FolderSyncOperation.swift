@@ -90,14 +90,9 @@ enum FolderSyncOperation {
                                               remoteLastModified: remoteLastModified) {
             if shouldBump(localOrRemote: localLastModified, newerLastMod: newerLastModified) {
                 // Bump local.
-                // Simplest way to do this is to create and remove a file, unfortunately Foundation doesn't give a better way.
-                // Unfortunately, this does not respect the supplied modification date, instead it sets the dates to 'now'. TODO find a better solution than this.
-                let url = URL(fileURLWithPath: syncContext.config.folder).appendingPathComponent(path).appendingPathComponent(".flareTempTouchLastModified")
-                print(url.path)
-                FileManager.default.createFile(atPath: url.path,
-                                               contents: Data(),
-                                               attributes: [.modificationDate: newerLastModified])
-                try FileManager.default.removeItem(at: url)
+                // FileManager.setAttributes only affects the given folder, it won't bump the parents' last mod.
+                let folderPath = syncContext.config.folder + "/" + path.withTrailingSlashRemoved
+                try FileManager.default.setAttributes([.modificationDate: newerLastModified], ofItemAtPath: folderPath)
             }
             if shouldBump(localOrRemote: remoteLastModified, newerLastMod: newerLastModified) {
                 // Bump remote.
