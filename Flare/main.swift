@@ -111,6 +111,8 @@ import Foundation
 
 // You could think of this as the 'main' function in this executable. From here on, errors aren't handled, they are simply thrown.
 func runAndThrow() throws {
+    TODO remove all folder date comparisons :(
+    
     let syncContext = try SyncContext()
     let auth = try AuthorizeAccount.send(accountId: syncContext.config.accountId, applicationKey: syncContext.config.applicationKey)
     syncContext.authorizeAccountResponse = auth
