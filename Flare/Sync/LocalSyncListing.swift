@@ -13,7 +13,7 @@ let maxFileSize = 10*1024*1024 // Don't attempt to sync anything bigger than thi
 /// This lets you get a local listing of files for sync purposes.
 struct LocalSyncListing {
     let files: [String: SyncFileState] // Key = filename.
-    let filesToSkip: Set<String> // Files, for whatever reason, that we should skip. Eg file is locked.
+    let filesToSkip: Set<String> // Files, for whatever reason, that we should skip. Eg file is locked. These aren't in the 'files' list.
     let subfolders: Set<String>
 }
 

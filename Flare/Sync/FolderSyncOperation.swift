@@ -15,6 +15,8 @@ enum FolderSyncOperation {
         case missingAuth
         case missingUploadParams
         case nilDate
+        case nilIsDirectory
+        case nilContentModificationDate
     }
     
     /// Path is nil for root folder, otherwise something like 'foo/bar/' with a trailing slash.
@@ -76,6 +78,57 @@ enum FolderSyncOperation {
             case .clearLocalDeletedMetadata:
                 // TODO Delete '.deleted.*.ORIGINAL_FILENAME' with wildcard in case there are multiple deletions.
                 break
+            }
+        }
+        
+        // Now take note of which files exist, so we can know if anything was deleted later.
+        // Do a reconcilation against the metadata folder, so we don't unnecessarily make changes.
+        // Figure out what *should* be there.
+        var metadataThatShouldBeThere: [String: Date] = [:] // Keys = eg 'abc.txt'
+        for (name, state) in localState.files { // Name is eg 'foo/yada.txt'
+            guard case .exists(let lastMod, _, _) = state else { continue }
+            let nameSansPath: String // Eg 'foo.txt'
+            if let path = path {
+                nameSansPath = name.deleting(prefix: path)
+            } else { // Root folder.
+                nameSansPath = name
+            }
+            metadataThatShouldBeThere[nameSansPath] = lastMod
+        }
+
+        // Figure out what *is* there.
+        var metadataThatIsThere: [String: Date] = [:] // Keys = eg 'abc.txt'
+        let metadataFolder = syncContext.config.folder + "/" + (path ?? "") + localMetadataFolder // No trailing slash.
+        let metadataURL = URL(fileURLWithPath: metadataFolder, isDirectory: true)
+        let contents = try FileManager.default.myContents(ofDirectory: metadataURL)
+        for file in contents {
+            let resourceValues = try file.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey])
+            guard let isDirectory = resourceValues.isDirectory else { throw Errors.nilIsDirectory }
+            guard !isDirectory else { continue } // We don't want to track folders.
+            guard let contentModificationDate = resourceValues.contentModificationDate else { throw Errors.nilContentModificationDate }
+            let filePathRelativeToRoot = file.absoluteString.deleting(prefix: metadataURL.absoluteString) // Eg 'foo.txt'
+            metadataThatIsThere[filePathRelativeToRoot] = contentModificationDate
+        }
+        
+        // Reconcile the metadata folder appropriately.
+        let allMetadataFilenames: Set<String> = Set(metadataThatShouldBeThere.keys).union(metadataThatIsThere.keys)
+        for file in allMetadataFilenames {
+            let shouldBeDate = metadataThatShouldBeThere[file]
+            let isDate = metadataThatIsThere[file]
+            let fileURL = metadataURL.appendingPathComponent(file)
+            if let shouldBeDate = shouldBeDate, let isDate = isDate {
+                if abs(shouldBeDate.timeIntervalSince(isDate)) > 2 { // Date has changed.
+                    try FileManager.default.setAttributes([.modificationDate: shouldBeDate],
+                                                          ofItemAtPath: fileURL.path)
+                } else {
+                    // All good!
+                }
+            } else if let shouldBeDate = shouldBeDate { // Should be there but isn't, so add it.
+                FileManager.default.createFile(atPath: fileURL.path,
+                                               contents: Data(), // Empty file.
+                                               attributes: [.modificationDate: shouldBeDate])
+            } else if let _ = isDate { // Is in the metadata folder, but shouldn't be, so remove it.
+                try FileManager.default.removeItem(at: fileURL)
             }
         }
         

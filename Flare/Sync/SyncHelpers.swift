@@ -12,6 +12,7 @@ import Foundation
 let fileInfoLastModifiedKey = "src_last_modified_millis"
 let bzHeaderLastModified = "X-Bz-Info-" + fileInfoLastModifiedKey
 let bzHeaderLastModifiedResponse = "x-bz-info-" + fileInfoLastModifiedKey
+let localMetadataFolder = ".flare" // Contains the dates of each folder.
 
 extension SyncContext {
     func pathUrl(path: String?) -> URL {
