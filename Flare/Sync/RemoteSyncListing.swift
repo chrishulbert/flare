@@ -12,7 +12,7 @@ import Foundation
 struct RemoteSyncListing {
     let files: [String: SyncFileState] // Key = filename.
     let filesToSkip: Set<String> // Files, for whatever reason, that we should skip. Eg half-uploaded.
-    let subfolders: [String: Date] // Value = last modified date.
+    let subfolders: Set<String>
 }
 
 extension RemoteSyncListing {
@@ -36,7 +36,7 @@ extension RemoteSyncListing {
         // Figure out what to make of the results.
         var fileStates: [String: SyncFileState] = [:]
         var filesToSkip: Set<String> = []
-        var subfolders: [String: Date] = [:]
+        var subfolders: Set<String> = []
         for file in files {
             guard let action = file.actionEnum else { continue }
             guard !file.fileName.isHiddenFile else { continue } // Skip hidden files, to match myContents(ofDirectory which also skips hidden files.
@@ -53,7 +53,7 @@ extension RemoteSyncListing {
                 fileStates[file.fileName] = .deleted(when)
 
             case .folder:
-                subfolders[file.fileName] = file.lastModified // Need to recurse the subfolder.
+                subfolders.insert(file.fileName)
             }
         }
         

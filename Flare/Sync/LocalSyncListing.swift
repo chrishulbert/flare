@@ -14,7 +14,7 @@ let maxFileSize = 10*1024*1024 // Don't attempt to sync anything bigger than thi
 struct LocalSyncListing {
     let files: [String: SyncFileState] // Key = filename.
     let filesToSkip: Set<String> // Files, for whatever reason, that we should skip. Eg file is locked.
-    let subfolders: [String: Date] // Value = last modified date.
+    let subfolders: Set<String>
 }
 
 extension LocalSyncListing {
@@ -28,7 +28,7 @@ extension LocalSyncListing {
     static func list(path: String?, syncContext: SyncContext) throws -> LocalSyncListing {
         var fileStates: [String: SyncFileState] = [:]
         var filesToSkip: Set<String> = []
-        var subfolders: [String: Date] = [:]
+        var subfolders: Set<String> = []
         let contents = try FileManager.default.myContents(ofDirectory: syncContext.pathUrl(path: path)) // Contents of directory doesn't return hidden files eg .DS_Store, which is helpful.
         let rootUrl = URL(fileURLWithPath: syncContext.config.folder)
         for file in contents {
@@ -37,8 +37,8 @@ extension LocalSyncListing {
             guard let isDirectory = resourceValues.isDirectory else { throw Errors.nilIsDirectory }
             guard let contentModificationDate = resourceValues.contentModificationDate else { throw Errors.nilContentModificationDate }
 
-            if isDirectory { // Add to a set of subfolders, along with local subfolders, so we don't add 2 operations for one folder.
-                subfolders[filePathRelativeToRoot] = contentModificationDate
+            if isDirectory {
+                subfolders.insert(filePathRelativeToRoot)
             } else {
                 guard let fileSize = resourceValues.fileSize else { throw Errors.nilFileSize } // Can only get filesize if not a dir.
                 if fileSize > maxFileSize {
