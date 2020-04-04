@@ -106,8 +106,8 @@ enum FolderSyncOperation {
             guard let isDirectory = resourceValues.isDirectory else { throw Errors.nilIsDirectory }
             guard !isDirectory else { continue } // We don't want to track folders.
             guard let contentModificationDate = resourceValues.contentModificationDate else { throw Errors.nilContentModificationDate }
-            let filePathRelativeToRoot = file.absoluteString.deleting(prefix: metadataURL.absoluteString) // Eg 'foo.txt'
-            metadataThatIsThere[filePathRelativeToRoot] = contentModificationDate
+            let fileName = file.absoluteString.deleting(prefix: metadataURL.absoluteString) // Eg 'foo.txt'
+            metadataThatIsThere[fileName] = contentModificationDate
         }
         
         // Reconcile the metadata folder appropriately.
