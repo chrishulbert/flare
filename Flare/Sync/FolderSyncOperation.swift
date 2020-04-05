@@ -69,7 +69,7 @@ enum FolderSyncOperation {
                                                contents: data,
                                                attributes: [.modificationDate: lastMod])
                 
-            case .deleteLocal:  // TODO rename to a hidden '.deleted.DATE.ORIGINAL_FILENAME' as a metadata thing, which gets deleted in a month.
+            case .deleteLocal:  // TODO rename to a hidden '.deleted.DATE.ORIGINAL_FILENAME' as a metadata thing, which gets deleted in a month?
                 try FileManager.default.removeItem(at: fileUrl)
 
             case .deleteRemote: // No need to do any 'deletion' metadata with this, because the Bz 'hide' does that for us.
@@ -111,6 +111,7 @@ enum FolderSyncOperation {
         }
         
         // Reconcile the metadata folder appropriately.
+        try FileManager.default.createDirectory(at: metadataURL, withIntermediateDirectories: true)
         let allMetadataFilenames: Set<String> = Set(metadataThatShouldBeThere.keys).union(metadataThatIsThere.keys)
         for file in allMetadataFilenames {
             let shouldBeDate = metadataThatShouldBeThere[file]
