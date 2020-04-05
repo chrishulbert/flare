@@ -41,9 +41,6 @@ extension ListingReconciliation {
                         actions.append(.download(file, remoteSize))
                     }
                 } else if localDate > remoteDate {
-                    // TODO as an optimisation, if the hashes match, only need to 'touch' the remote file to mark it as synced. Not sure if the Bz api allows this though.
-                    // This will mean that even if resyncing a folder, sha's will only be slowly recalculated once, to fix the dates.
-                    // Don't cap the file size when loading the local sha1, because it'll still be quicker than up/downloading!
                     actions.append(.upload(file, localSize))
                 } else {
                     // TODO as an optimisation, if the hashes match, only need to 'touch' the local file to mark it as synced.

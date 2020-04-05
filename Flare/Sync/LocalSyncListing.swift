@@ -49,7 +49,8 @@ extension LocalSyncListing {
             } else {
                 guard let fileSize = resourceValues.fileSize else { throw Errors.nilFileSize } // Can only get filesize if not a dir.
                 if fileSize > maxFileSize {
-                    filesToSkip.insert(filePathRelativeToRoot) // Too big. TODO implement 'b2_upload_part' uploads.
+                    print("Skipping \(filePathRelativeToRoot); too big")
+                    filesToSkip.insert(filePathRelativeToRoot)
                 } else {
                     let fileName = file.absoluteString.deleting(prefix: pathURL.absoluteString) // Eg 'foo.txt'
                     filesLookup[fileName] = DateAndSize(date: contentModificationDate, size: fileSize)

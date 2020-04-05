@@ -50,7 +50,6 @@ extension UploadResult {
         default:
             break
         }
-        // TODO detect 'broken pipe'
         return nil
     }
 }
