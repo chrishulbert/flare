@@ -58,9 +58,6 @@ extension LocalSyncListing {
         }
         
         // Get what's in the .flare metadata folder.
-        if (path ?? "") == "foo/bar/"{
-            print("-")
-        }
         let metadataFolder = syncContext.config.folder + "/" + (path ?? "") + localMetadataFolder // No trailing slash.
         let metadataURL = URL(fileURLWithPath: metadataFolder, isDirectory: true)
         let metadataContents = try FileManager.default.myContents(ofDirectory: metadataURL)
@@ -73,12 +70,6 @@ extension LocalSyncListing {
             let fileName = file.absoluteString.deleting(prefix: metadataURL.absoluteString) // Eg 'foo.txt'
             metadataLookup[fileName] = contentModificationDate
         }
-        
-//        print("---\(path ?? "root")---")
-//        dump(filesLookup.keys)
-//        print("---")
-//        dump(metadataLookup.keys)
-//        print("---")
         
         // Compare vs the .flare subfolder.
         var fileStates: [String: SyncFileState] = [:]

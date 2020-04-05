@@ -61,7 +61,7 @@ extension ListingReconciliation {
                 actions.append(.upload(file, localSize))
                 
             case (.deleted(let localDate), .exists(let remoteDate, let remoteSize, _)):
-                if localDate > remoteDate {
+                if localDate.addingTimeInterval(1) > remoteDate { // Give it 1s leeway for float inaccuracy.
                     actions.append(.deleteRemote(file))
                 } else {
                     actions.append(.download(file, remoteSize))
