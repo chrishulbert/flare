@@ -58,9 +58,9 @@ class Service {
     /// This throws Errors.not200 on non-200s.
     func makeRaw(request: URLRequest) throws -> (Data, HTTPURLResponse) {
         let (data, response) = try session.dataTaskSync(request: request)
-        #if DEBUG
-        if let s = data.asString { print(s) }
-        #endif
+        // #if DEBUG
+        // if let s = data.asString { print(s) }
+        // #endif
         guard 200 <= response.statusCode && response.statusCode < 300 else {
             let json = data.asJson
             let code = json?["code"] as? String // eg "bad_request"
