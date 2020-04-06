@@ -10,7 +10,7 @@ import Foundation
 
 /// This lets you get a remote listing of files for sync purposes.
 struct RemoteSyncListing {
-    let files: [String: SyncFileState] // Key = filename.
+    let files: [String: SyncItemState] // Key = filename.
     let filesToSkip: Set<String> // Files, for whatever reason, that we should skip. Eg half-uploaded.
     let subfolders: Set<String>
 }
@@ -34,7 +34,7 @@ extension RemoteSyncListing {
                                                        delimiter: "/")
         
         // Figure out what to make of the results.
-        var fileStates: [String: SyncFileState] = [:]
+        var fileStates: [String: SyncItemState] = [:]
         var filesToSkip: Set<String> = []
         var subfolders: Set<String> = []
         for file in files {

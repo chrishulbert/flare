@@ -12,9 +12,9 @@ let maxFileSize = 10*1024*1024 // Don't attempt to sync anything bigger than thi
 
 /// This lets you get a local listing of files for sync purposes.
 struct LocalSyncListing {
-    let files: [String: SyncFileState] // Key = filename including path from root.
+    let files: [String: SyncItemState] // Key = filename including path from root.
     let filesToSkip: Set<String> // Files, for whatever reason, that we should skip. Eg file is locked. These aren't in the 'files' list.
-    let subfolders: Set<String> // Paths relative to root, with trailing slash, eg "foo/bar/yada/"
+    let subfolders: [String: SyncItemState] // Paths relative to root, with trailing slash, eg "foo/bar/yada/"
 }
 
 extension LocalSyncListing {
@@ -32,7 +32,7 @@ extension LocalSyncListing {
     /// Path=nil for root folder, trailing slash otherwise.
     static func list(path: String?, syncContext: SyncContext) throws -> LocalSyncListing {
         var filesToSkip: Set<String> = []
-        var subfolders: Set<String> = []
+        var subfolders: Set<String> = [] // Eg 'foo/bar/yada/'
         let pathURL = syncContext.pathUrl(path: path)
         let contents = try FileManager.default.myContents(ofDirectory: pathURL) // Contents of directory doesn't return hidden files eg .DS_Store, which is helpful.
         let rootUrl = URL(fileURLWithPath: syncContext.config.folder)
@@ -59,28 +59,30 @@ extension LocalSyncListing {
         }
         
         // Get what's in the .flare metadata folder.
-        TODO check for folders.
         let metadataFolder = syncContext.config.folder + "/" + (path ?? "") + localMetadataFolder // No trailing slash.
         let metadataURL = URL(fileURLWithPath: metadataFolder, isDirectory: true)
         let metadataContents = try FileManager.default.myContents(ofDirectory: metadataURL)
-        var metadataLookup: [String: Date] = [:] // Key will be eg 'foo.txt'
+        var filesMetadataLookup: [String: Date] = [:] // Key will be eg 'foo.txt'
+        var foldersMetadata: Set<String> = [] // Key will be eg 'foo/bar/yada/'
         for file in metadataContents {
             let resourceValues = try file.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey])
-            guard let isDirectory = resourceValues.isDirectory else { throw Errors.nilIsDirectory }
-            guard !isDirectory else { continue } // There shouldn't be folders in the metadata folder.
-            guard let contentModificationDate = resourceValues.contentModificationDate else { throw Errors.nilContentModificationDate }
             let fileName = file.absoluteString.deleting(prefix: metadataURL.absoluteString) // Eg 'foo.txt'
-            metadataLookup[fileName] = contentModificationDate
+            guard let isDirectory = resourceValues.isDirectory else { throw Errors.nilIsDirectory }
+            guard let contentModificationDate = resourceValues.contentModificationDate else { throw Errors.nilContentModificationDate }
+            if isDirectory {
+                foldersMetadata.insert((path ?? "") + fileName)
+            } else {
+                filesMetadataLookup[fileName] = contentModificationDate
+            }
         }
         
-        // Compare vs the .flare subfolder.
-        var fileStates: [String: SyncFileState] = [:]
-        let allFiles: Set<String> = Set(filesLookup.keys).union(metadataLookup.keys)
-        let allFilesSorted = allFiles.sorted() // So it syncs predictably.
-        for file in allFilesSorted {
+        // Compare files vs the .flare subfolder.
+        var fileStates: [String: SyncItemState] = [:]
+        let allFiles: Set<String> = Set(filesLookup.keys).union(filesMetadataLookup.keys)
+        for file in allFiles {
             let pathRelativeToRoot = (path ?? "") + file
             let fileDetails = filesLookup[file]
-            let metaDetails = metadataLookup[file]
+            let metaDetails = filesMetadataLookup[file]
             if let fileDetails = fileDetails, let _ = metaDetails {
                 fileStates[pathRelativeToRoot] = .exists(fileDetails.date, fileDetails.size, nil)
             } else if let fileDetails = fileDetails {
@@ -93,7 +95,22 @@ extension LocalSyncListing {
             }
         }
         
-        return LocalSyncListing(files: fileStates, filesToSkip: filesToSkip, subfolders: subfolders)
+        // Compare folders vs the metadata.
+        var folderStates: [String: SyncItemState] = [:]
+        let allFolders: Set<String> = subfolders.union(foldersMetadata) // Trailing slashes, relative to root.
+        for folder in allFolders {
+            let folderExists = subfolders.contains(folder)
+            let metaExists = foldersMetadata.contains(folder)
+            if folderExists && metaExists {
+                folderStates[folder] = .exists(Date(), 0, nil)
+            } else if folderExists && !metaExists {
+                folderStates[folder] = .exists(Date(), 0, nil)
+            } else if !folderExists && metaExists {
+                folderStates[folder] = .deleted(Date())
+            }
+        }
+        
+        return LocalSyncListing(files: fileStates, filesToSkip: filesToSkip, subfolders: folderStates)
     }
 
 }

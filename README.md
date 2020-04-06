@@ -12,3 +12,12 @@ Simple 2-way sync to Backblaze B2
 * Windows is much the same apparently: parent-parent folders don't update dates.
 * Summary: Folder last modified dates are useless.
 * There used to be plenty of code in here for using folder dates to skip entire hierarchies efficiently, but that unfortunately has to be removed. 
+
+## Folder syncing limitations
+
+Folder syncing is very rudimentary. It should work until you try to delete a folder, at which point it'll lose metadata for that folder and assume it needs to be re-synced down.
+Flare keeps track of folders that existed at the last sync, so it can guess that a folder was deleted since last sync. However, since folder modification dates are largely unhelpful, it's rudimentary.
+And since the BZ api doesn't give us information about folder deletions, even if you did send a deletion 'up', another client wouldn't know to pull that deletion 'down'.
+Perhaps something could be done with empty folders: If it detects that some files were deleted in a folder, and thus emptied a folder, it would presume that the folder was deleted and is to be removed locally.
+However, I'm still uncomfortable with the heuristics for folder deletions because the dates are meaningless, so I'm not going to implement this.
+Having said all that, if you have folders with contents, Flare will work just fine - just don't try deleting those folders. 

@@ -84,11 +84,7 @@ enum FolderSyncOperation {
         // Now take note of which files exist, so we can know if anything was deleted later.
         // Do a reconcilation against the metadata folder, so we don't unnecessarily make changes.
         // Figure out what *should* be there.
-        struct Meta {
-            let date: Date
-            let isFolder: Bool
-        }
-        var metadataThatShouldBeThere: [String: Meta] = [:] // Keys = eg 'abc.txt'
+        var metadataThatShouldBeThere: [String: Metadata] = [:] // Keys = eg 'abc.txt'
         for (name, state) in localState.files { // Name is eg 'foo/yada.txt'
             guard case .exists(let lastMod, _, _) = state else { continue }
             let nameSansPath: String // Eg 'foo.txt'
@@ -97,15 +93,16 @@ enum FolderSyncOperation {
             } else { // Root folder.
                 nameSansPath = name
             }
-            metadataThatShouldBeThere[nameSansPath] = Meta(date: lastMod, isFolder: false)
+            metadataThatShouldBeThere[nameSansPath] = Metadata(date: lastMod, isFolder: false)
         }
-        for name in localState.subfolders {
+        for (name, state) in localState.subfolders {
+            guard case .exists = state else { continue }
             let nameSansPath = name.deleting(prefix: path ?? "").withoutTrailingSlash
-            metadataThatShouldBeThere[nameSansPath] = Meta(date: Date(), isFolder: true) // Folder dates don't matter.
+            metadataThatShouldBeThere[nameSansPath] = Metadata(date: Date(), isFolder: true) // Folder dates don't matter.
         }
 
         // Figure out what *is* there.
-        var metadataThatIsThere: [String: Meta] = [:] // Keys = eg 'abc.txt'
+        var metadataThatIsThere: [String: Metadata] = [:] // Keys = eg 'abc.txt'
         let metadataFolder = syncContext.config.folder + "/" + (path ?? "") + localMetadataFolder // No trailing slash.
         let metadataURL = URL(fileURLWithPath: metadataFolder, isDirectory: true)
         let contents = try FileManager.default.myContents(ofDirectory: metadataURL)
@@ -114,10 +111,10 @@ enum FolderSyncOperation {
             guard let isDirectory = resourceValues.isDirectory else { throw Errors.nilIsDirectory }
             let fileName = file.absoluteString.deleting(prefix: metadataURL.absoluteString) // Eg 'foo.txt'
             if isDirectory {
-                metadataThatIsThere[fileName.withoutTrailingSlash] = Meta(date: Date(), isFolder: true) // Folder dates don't matter.
+                metadataThatIsThere[fileName.withoutTrailingSlash] = Metadata(date: Date(), isFolder: true) // Folder dates don't matter.
             } else {
                 guard let contentModificationDate = resourceValues.contentModificationDate else { throw Errors.nilContentModificationDate }
-                metadataThatIsThere[fileName] = Meta(date: contentModificationDate, isFolder: false)
+                metadataThatIsThere[fileName] = Metadata(date: contentModificationDate, isFolder: false)
             }
         }
         

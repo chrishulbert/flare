@@ -25,8 +25,9 @@ extension SyncContext {
     }
 }
 
-enum SyncFileState {
-    case exists(Date, Int, String?) // modified, size in bytes, sha1 for remote only.
+// A file or folder.
+enum SyncItemState {
+    case exists(Date, Int, String?) // modified, size in bytes (0 for folders), sha1 for remote only.
     case deleted(Date)
     case missing
 }
@@ -62,7 +63,7 @@ extension String {
     
     var withoutTrailingSlash: String {
         guard hasSuffix("/") else { return self }
-        return String(dropLast(1))        
+        return String(dropLast(1))
     }
 }
 
@@ -152,4 +153,9 @@ extension Data {
         let json = try? JSONSerialization.jsonObject(with: self, options: [])
         return json as? [AnyHashable: Any]
     }
+}
+
+struct Metadata {
+    let date: Date // Meaningless for folders.
+    let isFolder: Bool
 }
