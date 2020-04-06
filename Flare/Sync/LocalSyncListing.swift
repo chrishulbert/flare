@@ -14,7 +14,7 @@ let maxFileSize = 10*1024*1024 // Don't attempt to sync anything bigger than thi
 struct LocalSyncListing {
     let files: [String: SyncFileState] // Key = filename including path from root.
     let filesToSkip: Set<String> // Files, for whatever reason, that we should skip. Eg file is locked. These aren't in the 'files' list.
-    let subfolders: Set<String>
+    let subfolders: Set<String> // Paths relative to root, with trailing slash, eg "foo/bar/yada/"
 }
 
 extension LocalSyncListing {
@@ -59,6 +59,7 @@ extension LocalSyncListing {
         }
         
         // Get what's in the .flare metadata folder.
+        TODO check for folders.
         let metadataFolder = syncContext.config.folder + "/" + (path ?? "") + localMetadataFolder // No trailing slash.
         let metadataURL = URL(fileURLWithPath: metadataFolder, isDirectory: true)
         let metadataContents = try FileManager.default.myContents(ofDirectory: metadataURL)

@@ -84,7 +84,11 @@ enum FolderSyncOperation {
         // Now take note of which files exist, so we can know if anything was deleted later.
         // Do a reconcilation against the metadata folder, so we don't unnecessarily make changes.
         // Figure out what *should* be there.
-        var metadataThatShouldBeThere: [String: Date] = [:] // Keys = eg 'abc.txt'
+        struct Meta {
+            let date: Date
+            let isFolder: Bool
+        }
+        var metadataThatShouldBeThere: [String: Meta] = [:] // Keys = eg 'abc.txt'
         for (name, state) in localState.files { // Name is eg 'foo/yada.txt'
             guard case .exists(let lastMod, _, _) = state else { continue }
             let nameSansPath: String // Eg 'foo.txt'
@@ -93,48 +97,69 @@ enum FolderSyncOperation {
             } else { // Root folder.
                 nameSansPath = name
             }
-            metadataThatShouldBeThere[nameSansPath] = lastMod
+            metadataThatShouldBeThere[nameSansPath] = Meta(date: lastMod, isFolder: false)
+        }
+        for name in localState.subfolders {
+            let nameSansPath = name.deleting(prefix: path ?? "").withoutTrailingSlash
+            metadataThatShouldBeThere[nameSansPath] = Meta(date: Date(), isFolder: true) // Folder dates don't matter.
         }
 
         // Figure out what *is* there.
-        var metadataThatIsThere: [String: Date] = [:] // Keys = eg 'abc.txt'
+        var metadataThatIsThere: [String: Meta] = [:] // Keys = eg 'abc.txt'
         let metadataFolder = syncContext.config.folder + "/" + (path ?? "") + localMetadataFolder // No trailing slash.
         let metadataURL = URL(fileURLWithPath: metadataFolder, isDirectory: true)
         let contents = try FileManager.default.myContents(ofDirectory: metadataURL)
         for file in contents {
             let resourceValues = try file.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey])
             guard let isDirectory = resourceValues.isDirectory else { throw Errors.nilIsDirectory }
-            guard !isDirectory else { continue } // We don't want to track folders.
-            guard let contentModificationDate = resourceValues.contentModificationDate else { throw Errors.nilContentModificationDate }
             let fileName = file.absoluteString.deleting(prefix: metadataURL.absoluteString) // Eg 'foo.txt'
-            metadataThatIsThere[fileName] = contentModificationDate
+            if isDirectory {
+                metadataThatIsThere[fileName.withoutTrailingSlash] = Meta(date: Date(), isFolder: true) // Folder dates don't matter.
+            } else {
+                guard let contentModificationDate = resourceValues.contentModificationDate else { throw Errors.nilContentModificationDate }
+                metadataThatIsThere[fileName] = Meta(date: contentModificationDate, isFolder: false)
+            }
         }
         
         // Reconcile the metadata folder appropriately.
         try FileManager.default.createDirectory(at: metadataURL, withIntermediateDirectories: true)
         let allMetadataFilenames: Set<String> = Set(metadataThatShouldBeThere.keys).union(metadataThatIsThere.keys)
         for file in allMetadataFilenames {
-            let shouldBeDate = metadataThatShouldBeThere[file]
-            let isDate = metadataThatIsThere[file]
+            let shouldBeMeta = metadataThatShouldBeThere[file]
+            let isMeta = metadataThatIsThere[file]
             let fileURL = metadataURL.appendingPathComponent(file)
-            if let shouldBeDate = shouldBeDate, let isDate = isDate {
-                if abs(shouldBeDate.timeIntervalSince(isDate)) > 2 { // Date has changed.
-                    try FileManager.default.setAttributes([.modificationDate: shouldBeDate],
+            if let shouldBeMeta = shouldBeMeta, let isMeta = isMeta {
+                if shouldBeMeta.isFolder != isMeta.isFolder { // Changed from folder to file or vice versa!
+                    try FileManager.default.removeItem(at: fileURL)
+                    if shouldBeMeta.isFolder {
+                        try FileManager.default.createDirectory(at: fileURL, withIntermediateDirectories: true)
+                    } else {
+                        FileManager.default.createFile(atPath: fileURL.path,
+                                                       contents: Data(), // Empty file.
+                                                       attributes: [.modificationDate: shouldBeMeta.date])
+                    }
+                } else if !shouldBeMeta.isFolder && !isMeta.isFolder && abs(shouldBeMeta.date.timeIntervalSince(isMeta.date)) > 2 { // Date has changed.
+                    try FileManager.default.setAttributes([.modificationDate: shouldBeMeta],
                                                           ofItemAtPath: fileURL.path)
                 } else {
                     // All good!
                 }
-            } else if let shouldBeDate = shouldBeDate { // Should be there but isn't, so add it.
-                FileManager.default.createFile(atPath: fileURL.path,
-                                               contents: Data(), // Empty file.
-                                               attributes: [.modificationDate: shouldBeDate])
-            } else if let _ = isDate { // Is in the metadata folder, but shouldn't be, so remove it.
+            } else if let shouldBeMeta = shouldBeMeta { // Should be there but isn't, so add it.
+                if shouldBeMeta.isFolder {
+                    try FileManager.default.createDirectory(at: fileURL, withIntermediateDirectories: true)
+                } else {
+                    FileManager.default.createFile(atPath: fileURL.path,
+                                                   contents: Data(), // Empty file.
+                                                   attributes: [.modificationDate: shouldBeMeta.date])
+                }
+            } else if let _ = isMeta { // Is in the metadata folder, but shouldn't be, so remove it.
                 try FileManager.default.removeItem(at: fileURL)
             }
         }
-        
-        // TODO make it skip files that can't be accessed locally eg they're being saved or something, eg mark them as 'skip this!', deal with them next time around?
+
         // TODO figure out how to model folder deletions.
+
+        // TODO make it skip files that can't be accessed locally eg they're being saved or something, eg mark them as 'skip this!', deal with them next time around?
         // TODO for local deletions, think about how to model folder deletes, given that if we simply make `.deleted.DATE.FILENAME` in the same folder it'll be lost. Instead create 'FlareRoot/relevant/folder/here/.deleted.foo.filename ? And for sync deletions, *move* to same file?
         // TODO Or maybe on local deletion, create a .deleted.XFILENAME file which this'll then pick up and remove once synced.
         // TODO When sync deletes a file, move it to a 'deleted' folder eg yyyymmd_filename which gets nuked once >1mo.

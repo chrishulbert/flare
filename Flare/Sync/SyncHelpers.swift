@@ -59,6 +59,11 @@ extension String {
         guard self.hasPrefix(prefix) else { return self }
         return String(self.dropFirst(prefix.count))
     }
+    
+    var withoutTrailingSlash: String {
+        guard hasSuffix("/") else { return self }
+        return String(dropLast(1))        
+    }
 }
 
 extension FileManager {
