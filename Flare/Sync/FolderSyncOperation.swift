@@ -70,17 +70,18 @@ enum FolderSyncOperation {
                                                contents: data,
                                                attributes: [.modificationDate: lastMod])
                 
-            case .deleteLocal:  // TODO rename to a hidden '.deleted.DATE.ORIGINAL_FILENAME' as a metadata thing, which gets deleted in a month?
+            case .deleteLocal: // Rename to eg .flare/Deleted/YYYYMMDD.OriginalFilename.txt
                 let pathUrl: URL
                 if let path = path {
-                    pathUrl = rootUrl.appendingPathComponent(path)
+                    pathUrl = rootUrl.appendingPathComponent(path, isDirectory: true)
                 } else {
                     pathUrl = rootUrl
                 }
-                let deletionsFolderUrl = pathUrl.appendingPathComponent(localMetadataFolder).appendingPathComponent(deletionsMetadataSubfolder)
+                let metaFolder = pathUrl.appendingPathComponent(localMetadataFolder, isDirectory: true)
+                let deletionsFolderUrl = metaFolder.appendingPathComponent(deletedMetadataSubfolder, isDirectory: true)
                 let ymd = Date().asYYYYMMDD
                 let deletedFilename = ymd + "." + justFilename
-                let deletedFileUrl = deletionsFolderUrl.appendingPathComponent(deletedFilename)
+                let deletedFileUrl = deletionsFolderUrl.appendingPathComponent(deletedFilename, isDirectory: false)
                 FileManager.default.createDirectory(at: deletionsFolderUrl, withIntermediateDirectories: true)
                 FileManager.default.moveItem(at: fileUrl, to: deletedFileUrl)
 
@@ -165,6 +166,10 @@ enum FolderSyncOperation {
                 try FileManager.default.removeItem(at: fileURL)
             }
         }
+        
+        // Remove too-old deleted files.
+        metadataURL.appendPathComponent(<#T##pathComponent: String##String#>, isDirectory: <#T##Bool#>)
+        
 
         return reconciliation.subfolders
     }
