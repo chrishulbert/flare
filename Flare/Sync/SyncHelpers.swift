@@ -13,6 +13,7 @@ let fileInfoLastModifiedKey = "src_last_modified_millis"
 let bzHeaderLastModified = "X-Bz-Info-" + fileInfoLastModifiedKey
 let bzHeaderLastModifiedResponse = "x-bz-info-" + fileInfoLastModifiedKey
 let localMetadataFolder = ".flare" // Contains the dates of each folder.
+let deletionsMetadataSubfolder = "Deleted"
 
 extension SyncContext {
     func pathUrl(path: String?) -> URL {
@@ -64,6 +65,14 @@ extension String {
     var withoutTrailingSlash: String {
         guard hasSuffix("/") else { return self }
         return String(dropLast(1))
+    }
+    
+    // From 'foo/bar/yada.txt' returns 'foo/bar' and 'yada.txt'
+    func folderAndFilename() -> (String, String) {
+        let comps = components(separatedBy: "/")
+        let folder = comps.prefix(comps.count-1).joined(separator: "/")
+        let file = comps.last ?? ""
+        return (folder, file)
     }
 }
 
@@ -158,4 +167,11 @@ extension Data {
 struct Metadata {
     let date: Date // Meaningless for folders.
     let isFolder: Bool
+}
+
+extension Date {
+    var asYYYYMMDD: String {
+        let dc = Calendar.current.dateComponents([.year, .month, .day], from: self)
+        return String(format: "%04d%02d%02d", dc.year ?? 0, dc.month ?? 0, dc.day ?? 0)
+    }
 }

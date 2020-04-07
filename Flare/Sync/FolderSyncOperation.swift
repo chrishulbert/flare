@@ -34,7 +34,8 @@ enum FolderSyncOperation {
         let rootUrl = URL(fileURLWithPath: syncContext.config.folder)
         for action in reconciliation.actions {
             print("Action: \(action)")
-            let fileName = action.fileName
+            let fileName = action.fileName // Eg 'foo/bar/yada.txt'
+            let (folder, justFilename) = fileName.folderAndFilename() // eg 'foo/bar' and 'yada.txt'
             let fileUrl = rootUrl.appendingPathComponent(action.fileName)
             switch action {
             case .upload:
@@ -70,7 +71,18 @@ enum FolderSyncOperation {
                                                attributes: [.modificationDate: lastMod])
                 
             case .deleteLocal:  // TODO rename to a hidden '.deleted.DATE.ORIGINAL_FILENAME' as a metadata thing, which gets deleted in a month?
-                try FileManager.default.removeItem(at: fileUrl)
+                let pathUrl: URL
+                if let path = path {
+                    pathUrl = rootUrl.appendingPathComponent(path)
+                } else {
+                    pathUrl = rootUrl
+                }
+                let deletionsFolderUrl = pathUrl.appendingPathComponent(localMetadataFolder).appendingPathComponent(deletionsMetadataSubfolder)
+                let ymd = Date().asYYYYMMDD
+                let deletedFilename = ymd + "." + justFilename
+                let deletedFileUrl = deletionsFolderUrl.appendingPathComponent(deletedFilename)
+                FileManager.default.createDirectory(at: deletionsFolderUrl, withIntermediateDirectories: true)
+                FileManager.default.moveItem(at: fileUrl, to: deletedFileUrl)
 
             case .deleteRemote: // No need to do any 'deletion' metadata with this, because the Bz 'hide' does that for us.
                 try HideFile.send(token: auth.authorizationToken, apiUrl: auth.apiUrl, bucketId: syncContext.config.bucketId, fileName: fileName)
@@ -153,10 +165,6 @@ enum FolderSyncOperation {
                 try FileManager.default.removeItem(at: fileURL)
             }
         }
-
-        // TODO for local deletions, think about how to model folder deletes, given that if we simply make `.deleted.DATE.FILENAME` in the same folder it'll be lost. Instead create 'FlareRoot/relevant/folder/here/.deleted.foo.filename ? And for sync deletions, *move* to same file?
-        // TODO Or maybe on local deletion, create a .deleted.XFILENAME file which this'll then pick up and remove once synced.
-        // TODO When sync deletes a file, move it to a 'deleted' folder eg yyyymmd_filename which gets nuked once >1mo.
 
         return reconciliation.subfolders
     }
