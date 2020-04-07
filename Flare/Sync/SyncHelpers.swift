@@ -164,11 +164,6 @@ extension Data {
     }
 }
 
-struct Metadata {
-    let date: Date // Meaningless for folders.
-    let isFolder: Bool
-}
-
 extension Date {
     var asYYYYMMDD: String {
         let dc = Calendar.current.dateComponents([.year, .month, .day], from: self)
