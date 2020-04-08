@@ -6,11 +6,7 @@
 //  Copyright © 2019 Splinter. All rights reserved.
 //
 
-// Libuv: https://github.com/Trevi-Swift/swift-libuv
-// Libuv: http://docs.libuv.org/en/v1.x/guide/filesystem.html#file-change-events
-
 import Foundation
-//import CLibUV
 
 // You could think of this as the 'main' function in this executable. From here on, errors aren't handled, they are simply thrown.
 func runAndThrow() throws {
