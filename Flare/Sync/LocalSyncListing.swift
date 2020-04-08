@@ -14,7 +14,7 @@ let maxFileSize = 10*1024*1024 // Don't attempt to sync anything bigger than thi
 struct LocalSyncListing {
     let files: [String: SyncItemState] // Key = filename including path from root.
     let filesToSkip: Set<String> // Files, for whatever reason, that we should skip. Eg file is locked. These aren't in the 'files' list.
-    let subfolders: [String: SyncItemState] // Paths relative to root, with trailing slash, eg "foo/bar/yada/"
+    let subfolders: Set<String> // Paths relative to root, with trailing slash, eg "foo/bar/yada/"
 }
 
 extension LocalSyncListing {
@@ -63,17 +63,13 @@ extension LocalSyncListing {
         let metadataURL = URL(fileURLWithPath: metadataFolder, isDirectory: true)
         let metadataContents = try FileManager.default.myContents(ofDirectory: metadataURL)
         var filesMetadataLookup: [String: Date] = [:] // Key will be eg 'foo.txt'
-        var foldersMetadata: Set<String> = [] // Key will be eg 'foo/bar/yada/'
         for file in metadataContents {
             let resourceValues = try file.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey])
             let fileName = file.absoluteString.deleting(prefix: metadataURL.absoluteString) // Eg 'foo.txt'
             guard let isDirectory = resourceValues.isDirectory else { throw Errors.nilIsDirectory }
+            guard !isDirectory else { continue }
             guard let contentModificationDate = resourceValues.contentModificationDate else { throw Errors.nilContentModificationDate }
-            if isDirectory {
-                foldersMetadata.insert((path ?? "") + fileName)
-            } else {
-                filesMetadataLookup[fileName] = contentModificationDate
-            }
+            filesMetadataLookup[fileName] = contentModificationDate
         }
         
         // Compare files vs the .flare subfolder.
@@ -94,23 +90,8 @@ extension LocalSyncListing {
                 fileStates[pathRelativeToRoot] = .deleted(metaDetails)
             }
         }
-        
-        // Compare folders vs the metadata.
-        var folderStates: [String: SyncItemState] = [:]
-        let allFolders: Set<String> = subfolders.union(foldersMetadata) // Trailing slashes, relative to root.
-        for folder in allFolders {
-            let folderExists = subfolders.contains(folder)
-            let metaExists = foldersMetadata.contains(folder)
-            if folderExists && metaExists {
-                folderStates[folder] = .exists(Date(), 0, nil)
-            } else if folderExists && !metaExists {
-                folderStates[folder] = .exists(Date(), 0, nil)
-            } else if !folderExists && metaExists {
-                folderStates[folder] = .deleted(Date())
-            }
-        }
-        
-        return LocalSyncListing(files: fileStates, filesToSkip: filesToSkip, subfolders: folderStates)
+                
+        return LocalSyncListing(files: fileStates, filesToSkip: filesToSkip, subfolders: subfolders)
     }
 
 }

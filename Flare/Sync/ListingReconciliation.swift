@@ -91,7 +91,7 @@ extension ListingReconciliation {
         }
         
         // We have to iterate all subfolders, because most OS's don't accurately manage folder dates.
-        let allSubfoldersSet: Set<String> = Set(local.subfolders.keys).union(remote.subfolders)
+        let allSubfoldersSet: Set<String> = Set(local.subfolders).union(remote.subfolders)
         let subfolders = allSubfoldersSet.sorted()
         
         return ListingReconciliation(actions: actions.sorted(), subfolders: subfolders)
