@@ -16,7 +16,8 @@ func runAndThrow() throws {
     syncContext.uploadParams = try GetUploadUrl.send(token: auth.authorizationToken,
                                                      apiUrl: auth.apiUrl,
                                                      bucketId: syncContext.config.bucketId)
-
+    let rootUrl = URL(fileURLWithPath: syncContext.config.folder)
+    try FileManager.default.createDirectory(at: rootUrl, withIntermediateDirectories: true)
     try RecursiveFolderSyncOperation.sync(path: nil, syncContext: syncContext)
 }
     
