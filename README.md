@@ -26,6 +26,11 @@ This file is JSON and looks like the following:
 * Hidden files are deliberately not synced. Things would quickly get out of hand (eg collisions/conflicts) if we synced eg git metadata, so I simply don't do that. This also has the upside of ignoring .DS_Store nonsense.
 * macOS touches folder's last modified dates whenever it changes a .DS_Store, which makes for extra work unfortunately.
 
+## Removing service
+
+    launchctl unload ~/Library/LaunchAgents/au.com.splinter.flare.plist
+    rm ~/Library/LaunchAgents/au.com.splinter.flare.plist
+
 ## Setting up as a service
 
 Create a file `au.com.splinter.flare.plist` with the following contents:
