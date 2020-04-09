@@ -23,7 +23,6 @@ func printHelp() {
     print("  flare configure")
     print("  flare sync")
     print("  flare schedule")
-    // TODO backup, add backup folder to configuration
 }
 
 func runSync() throws {
