@@ -40,7 +40,8 @@ enum Schedule {
     static func install() throws {
         print("Creating: " + plistPath)
         guard let executablePath = Bundle.main.executablePath else { throw Errors.missingExecutablePath }
-        let plist = plistTemplate.replacingOccurrences(of: "$PROGRAM", with: executablePath)
+        let plist = plistTemplate.replacingOccurrences(of: "$PROGRAM",
+                                                       with: (executablePath as NSString).standardizingPath)
         let path = (plistPath as NSString).expandingTildeInPath
         try plist.write(toFile: path, atomically: false, encoding: .utf8)
         
