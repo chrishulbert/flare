@@ -18,6 +18,7 @@
 		8379F31323460994004717F3 /* SyncContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F31223460994004717F3 /* SyncContext.swift */; };
 		8379F3152346148B004717F3 /* ListAllFileVersions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F3142346148B004717F3 /* ListAllFileVersions.swift */; };
 		8383F3E5243EFC7300C5CC2D /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8383F3E4243EFC7300C5CC2D /* Scheduler.swift */; };
+		8383F3E7243F0C1300C5CC2D /* Configurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8383F3E6243F0C1300C5CC2D /* Configurator.swift */; };
 		838810E4233EDD1D00C90D11 /* Watcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838810E3233EDD1D00C90D11 /* Watcher.swift */; };
 		839295AB233EEEF900C9A295 /* FileEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839295A7233EEEF900C9A295 /* FileEvent.swift */; };
 		839295AC233EEEF900C9A295 /* EventStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839295A8233EEEF900C9A295 /* EventStream.swift */; };
@@ -63,6 +64,7 @@
 		8379F31223460994004717F3 /* SyncContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncContext.swift; sourceTree = "<group>"; };
 		8379F3142346148B004717F3 /* ListAllFileVersions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListAllFileVersions.swift; sourceTree = "<group>"; };
 		8383F3E4243EFC7300C5CC2D /* Scheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scheduler.swift; sourceTree = "<group>"; };
+		8383F3E6243F0C1300C5CC2D /* Configurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configurator.swift; sourceTree = "<group>"; };
 		838810E3233EDD1D00C90D11 /* Watcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Watcher.swift; sourceTree = "<group>"; };
 		839295A7233EEEF900C9A295 /* FileEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileEvent.swift; sourceTree = "<group>"; };
 		839295A8233EEEF900C9A295 /* EventStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventStream.swift; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 				83F27B53231CDA5F006ADDC9 /* main.swift */,
 				83BFA0E3233B373B00DF488C /* SyncConfig.swift */,
 				8383F3E4243EFC7300C5CC2D /* Scheduler.swift */,
+				8383F3E6243F0C1300C5CC2D /* Configurator.swift */,
 			);
 			path = Flare;
 			sourceTree = "<group>";
@@ -280,6 +283,7 @@
 				839295AD233EEEF900C9A295 /* Witness.swift in Sources */,
 				83104A2623C3222500D02EB2 /* RecursiveFolderSyncOperation.swift in Sources */,
 				8379F30F234606ED004717F3 /* FolderSyncOperation.swift in Sources */,
+				8383F3E7243F0C1300C5CC2D /* Configurator.swift in Sources */,
 				83E1B8A4231F5DC100C1150D /* Helpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

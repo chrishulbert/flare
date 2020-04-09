@@ -9,7 +9,6 @@
 import Foundation
 
 struct SyncConfig {
-    let key: Data // AES256 eg 32 bytes
     let accountId: String
     let applicationKey: String
     let bucketId: String
@@ -19,9 +18,8 @@ struct SyncConfig {
 
 extension SyncConfig {
     enum Errors: Error {
-        case couldNotReadConfigFile
+        case missingConfig
         case couldNotJSONParseConfigFile
-        case keyMissingOrNot256bitBase64
         case accountIdMissing
         case applicationKeyMissing
         case bucketIdMissing
@@ -32,16 +30,15 @@ extension SyncConfig {
     // Load the config from disk.
     static func load() throws -> SyncConfig {
         let configPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".flare")
-        guard let configData = try? Data(contentsOf: configPath) else {
-            throw Errors.couldNotReadConfigFile
+        
+        guard FileManager.default.fileExists(atPath: configPath.path) else {
+            print("Please run 'flare configure' first.")
+            throw Errors.missingConfig
         }
+        
+        let configData = try Data(contentsOf: configPath)
         guard let configJson = configData.asJson else {
             throw Errors.couldNotJSONParseConfigFile
-        }
-        guard let keyRaw = configJson["key"] as? String,
-            let key = Data(base64Encoded: keyRaw),
-            key.count == 32 else {
-            throw Errors.keyMissingOrNot256bitBase64
         }
         guard let accountId = configJson["accountId"] as? String else {
             throw Errors.accountIdMissing
@@ -58,6 +55,23 @@ extension SyncConfig {
         guard let folder = configJson["folder"] as? String else {
             throw Errors.folderMissing
         }
-        return SyncConfig(key: key, accountId: accountId, applicationKey: applicationKey, bucketId: bucketId, bucketName: bucketName, folder: folder)
+        return SyncConfig(accountId: accountId,
+                          applicationKey: applicationKey,
+                          bucketId: bucketId,
+                          bucketName: bucketName,
+                          folder: (folder as NSString).expandingTildeInPath)
+    }
+    
+    func save() throws {
+        let configUrl = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".flare")
+        let dict: [String: String] = [
+            "accountId": accountId,
+            "applicationKey": applicationKey,
+            "bucketId": bucketId,
+            "bucketName": bucketName,
+            "folder": folder,
+        ]
+        let data = try JSONSerialization.data(withJSONObject: dict, options: [.prettyPrinted, .sortedKeys])
+        try data.write(to: configUrl)
     }
 }

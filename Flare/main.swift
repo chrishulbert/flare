@@ -46,6 +46,7 @@ func runAndThrow() throws {
     } else if CommandLine.arguments[1]=="sync" {
         try runSync()
     } else if CommandLine.arguments[1]=="configure" {
+        try Configurator.go()
     } else if CommandLine.arguments[1]=="schedule" {
         try Schedule.install()
     } else {
