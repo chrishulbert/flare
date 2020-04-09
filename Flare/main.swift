@@ -8,8 +8,25 @@
 
 import Foundation
 
-// You could think of this as the 'main' function in this executable. From here on, errors aren't handled, they are simply thrown.
-func runAndThrow() throws {
+func printHelp() {
+    print("Flare - Simple 2-way sync to Backblaze B2")
+    print("")
+    print("Usage:")
+    print("flare <command>")
+    print("")
+    print("Commands:")
+    print("  configure - you should run this first, this allows you to enter your ")
+    print("  schedule  - schedules flare to sync every hour")
+    print("  sync      - runs a sync immediately")
+    print("")
+    print("Examples:")
+    print("  flare configure")
+    print("  flare sync")
+    print("  flare schedule")
+    // TODO backup, add backup folder to configuration
+}
+
+func runSync() throws {
     let syncContext = try SyncContext()
     let auth = try AuthorizeAccount.send(accountId: syncContext.config.accountId, applicationKey: syncContext.config.applicationKey)
     syncContext.authorizeAccountResponse = auth
@@ -20,6 +37,21 @@ func runAndThrow() throws {
     try FileManager.default.createDirectory(at: rootUrl, withIntermediateDirectories: true)
     try RecursiveFolderSyncOperation.sync(path: nil, syncContext: syncContext)
 }
+
+// You could think of this as the 'main' function in this executable. From here on, errors aren't handled, they are simply thrown.
+func runAndThrow() throws {
+    if CommandLine.arguments.count <= 1 {
+        printHelp()
+        return
+    } else if CommandLine.arguments[1]=="sync" {
+        try runSync()
+    } else if CommandLine.arguments[1]=="configure" {
+    } else if CommandLine.arguments[1]=="schedule" {
+        try Schedule.install()
+    } else {
+        printHelp()
+    }
+}
     
 // This wraps the throwing code, displaying errors and exiting appropriately.
 func runAndExit() {
@@ -29,7 +61,6 @@ func runAndExit() {
         print("Error: \(error)")
         exit(EXIT_FAILURE)
     }
-    print("Success!")
     exit(EXIT_SUCCESS)
 }
 
