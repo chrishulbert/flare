@@ -33,9 +33,14 @@ fileprivate let plistTemplate = """
 fileprivate let plistPath = "~/Library/LaunchAgents/au.com.splinter.flare.plist"
 
 enum Schedule {
+    enum Errors: Error {
+        case missingExecutablePath
+    }
+    
     static func install() throws {
         print("Creating: " + plistPath)
-        let plist = plistTemplate.replacingOccurrences(of: "$PROGRAM", with: CommandLine.arguments[0])
+        guard let executablePath = Bundle.main.executablePath else { throw Errors.missingExecutablePath }
+        let plist = plistTemplate.replacingOccurrences(of: "$PROGRAM", with: executablePath)
         let path = (plistPath as NSString).expandingTildeInPath
         try plist.write(toFile: path, atomically: false, encoding: .utf8)
         
