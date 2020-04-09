@@ -1,33 +1,28 @@
 # Flare
 
-In short: Simple 2-way sync to a Backblaze B2 bucket across multiple computers, for cheaper-than-Dropbox storage :) 
+Simple 2-way sync to a Backblaze B2 bucket across multiple computers, for cheaper-than-Dropbox storage :)
+
+## Getting started
+
+* Install homebrew if needed: https://brew.sh/
+* Install flare: `brew install chrishulbert/flare/flare`
+* Configure it: `flare configure`
+* Schedule it to run hourly: `flare schedule`
+
+## Notes
 
 * Unlike dropbox which always consumes ram / cpu, have this scheduled to run hourly *and then quit*.
 * Backblaze gives you 2500 free requests / day, so with 8hrs/day of use, this gives you 300 folders.
 * One day it would be nice to make a version that listens for updates and sends immediately.
 * Or maybe just have a mini-app that watches, and if you touch anything, it debounces and spawns this to push up 1min after things slow down, and then quits again, as well as the hourly sync to pull down new stuff. Plus a menu option to 'sync now' if someone else has pushed.
 * Instead of running hourly (what if you open laptop at 3:12 and close at 3:56?) - check every minute if it's been at least an hour since last run. This also solves thundering herd.
-* Recommended: Set bz bucket policy to 'Keep only the last version of the file' (does that keep the 'hidden' record/file/version?)
-
-## Getting started
-
-You must make a config file in your home folder: `~/.flare`
-This file is JSON and looks like the following:
-
-    {
-        "key": "my-backblaze-key",
-        "accountId": "my-backblaze-account-id",
-        "applicationKey": "my-backblaze-app-key",
-        "bucketId": "my-backblaze-bucket-id",
-        "bucketName": "my-backblaze-bucket-name",
-        "folder":  "/Users/my-name/Flare"
-    }
-    
+* Recommended: Set bz bucket policy to 'Keep only the last version of the file' (does that keep the 'hidden' record/file/version?)   
 * Hidden files are deliberately not synced. Things would quickly get out of hand (eg collisions/conflicts) if we synced eg git metadata, so I simply don't do that. This also has the upside of ignoring .DS_Store nonsense.
 * macOS touches folder's last modified dates whenever it changes a .DS_Store, which makes for extra work unfortunately.
 
 ## Removing service
 
+    brew uninstall flare
     launchctl unload ~/Library/LaunchAgents/au.com.splinter.flare.plist
     rm ~/Library/LaunchAgents/au.com.splinter.flare.plist
 
