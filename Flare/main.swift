@@ -30,13 +30,15 @@ func printHelp() {
 }
 
 func runSync() throws {
+    // Log the date/time.
     let df = DateFormatter()
     df.timeStyle = .full
     df.dateStyle = .full
     print(df.string(from: Date()))
     
     let syncContext = try SyncContext()
-    let auth = try AuthorizeAccount.send(accountId: syncContext.config.accountId, applicationKey: syncContext.config.applicationKey)
+    let auth = try AuthorizeAccountWithRetries.send(accountId: syncContext.config.accountId,
+                                                    applicationKey: syncContext.config.applicationKey)
     syncContext.authorizeAccountResponse = auth
     syncContext.uploadParams = try GetUploadUrl.send(token: auth.authorizationToken,
                                                      apiUrl: auth.apiUrl,

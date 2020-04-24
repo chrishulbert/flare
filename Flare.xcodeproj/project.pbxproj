@@ -9,12 +9,12 @@
 /* Begin PBXBuildFile section */
 		83104A2423C319AB00D02EB2 /* SyncHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83104A2323C319AB00D02EB2 /* SyncHelpers.swift */; };
 		83104A2623C3222500D02EB2 /* RecursiveFolderSyncOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83104A2523C3222500D02EB2 /* RecursiveFolderSyncOperation.swift */; };
+		8317769F2453A3EB003580D1 /* AuthorizeAccountWithRetries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8317769E2453A3EB003580D1 /* AuthorizeAccountWithRetries.swift */; };
 		83186B9223E82BC40011A09C /* ListFileNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83186B9123E82BC40011A09C /* ListFileNames.swift */; };
 		831D439F23E6D30100433118 /* GetFileInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831D439E23E6D30100433118 /* GetFileInfo.swift */; };
 		83672EEE233787DA00CAF32A /* GetUploadUrl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83672EED233787DA00CAF32A /* GetUploadUrl.swift */; };
 		836B352F2330B1EC00E4B0C2 /* HideFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836B352E2330B1EC00E4B0C2 /* HideFile.swift */; };
 		8379F30F234606ED004717F3 /* FolderSyncOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F30E234606ED004717F3 /* FolderSyncOperation.swift */; };
-		8379F31123460905004717F3 /* BzAuthorizeOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F31023460905004717F3 /* BzAuthorizeOperation.swift */; };
 		8379F31323460994004717F3 /* SyncContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F31223460994004717F3 /* SyncContext.swift */; };
 		8379F3152346148B004717F3 /* ListAllFileVersions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379F3142346148B004717F3 /* ListAllFileVersions.swift */; };
 		8383F3E5243EFC7300C5CC2D /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8383F3E4243EFC7300C5CC2D /* Scheduler.swift */; };
@@ -54,13 +54,13 @@
 /* Begin PBXFileReference section */
 		83104A2323C319AB00D02EB2 /* SyncHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncHelpers.swift; sourceTree = "<group>"; };
 		83104A2523C3222500D02EB2 /* RecursiveFolderSyncOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecursiveFolderSyncOperation.swift; sourceTree = "<group>"; };
+		8317769E2453A3EB003580D1 /* AuthorizeAccountWithRetries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizeAccountWithRetries.swift; sourceTree = "<group>"; };
 		83186B9123E82BC40011A09C /* ListFileNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListFileNames.swift; sourceTree = "<group>"; };
 		831B41A82430953E00CCCEC1 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		831D439E23E6D30100433118 /* GetFileInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetFileInfo.swift; sourceTree = "<group>"; };
 		83672EED233787DA00CAF32A /* GetUploadUrl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetUploadUrl.swift; sourceTree = "<group>"; };
 		836B352E2330B1EC00E4B0C2 /* HideFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HideFile.swift; sourceTree = "<group>"; };
 		8379F30E234606ED004717F3 /* FolderSyncOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderSyncOperation.swift; sourceTree = "<group>"; };
-		8379F31023460905004717F3 /* BzAuthorizeOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BzAuthorizeOperation.swift; sourceTree = "<group>"; };
 		8379F31223460994004717F3 /* SyncContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncContext.swift; sourceTree = "<group>"; };
 		8379F3142346148B004717F3 /* ListAllFileVersions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListAllFileVersions.swift; sourceTree = "<group>"; };
 		8383F3E4243EFC7300C5CC2D /* Scheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scheduler.swift; sourceTree = "<group>"; };
@@ -127,7 +127,6 @@
 		83D74CDF2340B3990053EC72 /* Sync */ = {
 			isa = PBXGroup;
 			children = (
-				8379F31023460905004717F3 /* BzAuthorizeOperation.swift */,
 				8379F30E234606ED004717F3 /* FolderSyncOperation.swift */,
 				8379F31223460994004717F3 /* SyncContext.swift */,
 				83104A2323C319AB00D02EB2 /* SyncHelpers.swift */,
@@ -156,6 +155,7 @@
 				831D439E23E6D30100433118 /* GetFileInfo.swift */,
 				83186B9123E82BC40011A09C /* ListFileNames.swift */,
 				83B4B20724165866004E6F4A /* DownloadFileByName.swift */,
+				8317769E2453A3EB003580D1 /* AuthorizeAccountWithRetries.swift */,
 			);
 			path = BackblazeB2;
 			sourceTree = "<group>";
@@ -267,10 +267,10 @@
 				83F27B54231CDA5F006ADDC9 /* main.swift in Sources */,
 				8379F3152346148B004717F3 /* ListAllFileVersions.swift in Sources */,
 				839FBDC023277D6E0068E1F1 /* ListFileVersions.swift in Sources */,
+				8317769F2453A3EB003580D1 /* AuthorizeAccountWithRetries.swift in Sources */,
 				836B352F2330B1EC00E4B0C2 /* HideFile.swift in Sources */,
 				83B4B20424126840004E6F4A /* ListingReconciliation.swift in Sources */,
 				838810E4233EDD1D00C90D11 /* Watcher.swift in Sources */,
-				8379F31123460905004717F3 /* BzAuthorizeOperation.swift in Sources */,
 				83B4B20224125B42004E6F4A /* LocalSyncListing.swift in Sources */,
 				83B4B1FE240E631A004E6F4A /* ListAllLatestFileVersions.swift in Sources */,
 				83672EEE233787DA00CAF32A /* GetUploadUrl.swift in Sources */,
