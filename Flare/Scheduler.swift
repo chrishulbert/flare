@@ -27,6 +27,10 @@ fileprivate let plistTemplate = """
             <key>Minute</key>
             <integer>0</integer>
         </dict>
+        <key>StandardOutPath</key>
+        <string>/tmp/au.com.splinter.flare.stdout</string>
+        <key>StandardErrorPath</key>
+        <string>/tmp/au.com.splinter.flare.stderr</string>
     </dict>
 </plist>
 """

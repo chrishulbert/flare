@@ -23,9 +23,18 @@ func printHelp() {
     print("  flare configure")
     print("  flare sync")
     print("  flare schedule")
+    print("")
+    print("To un-schedule:")
+    print("  launchctl unload ~/Library/LaunchAgents/au.com.splinter.flare.plist")
+    print("  rm ~/Library/LaunchAgents/au.com.splinter.flare.plist")
 }
 
 func runSync() throws {
+    let df = DateFormatter()
+    df.timeStyle = .full
+    df.dateStyle = .full
+    print(df.string(from: Date()))
+    
     let syncContext = try SyncContext()
     let auth = try AuthorizeAccount.send(accountId: syncContext.config.accountId, applicationKey: syncContext.config.applicationKey)
     syncContext.authorizeAccountResponse = auth
