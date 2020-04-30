@@ -13,7 +13,7 @@ import Foundation
 enum AuthorizeAccountWithRetries {
     static func send(accountId: String, applicationKey: String) throws -> AuthorizeAccountResponse {
         
-        for i in 0..<4 {
+        for i in 0..<10 {
             if i>0 {
                 Thread.sleep(forTimeInterval: 5)
                 print("Authorise retry \(i)")
