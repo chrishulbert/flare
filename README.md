@@ -26,31 +26,6 @@ Simple 2-way sync to a Backblaze B2 bucket across multiple computers, for cheape
     launchctl unload ~/Library/LaunchAgents/au.com.splinter.flare.plist
     rm ~/Library/LaunchAgents/au.com.splinter.flare.plist
 
-## Setting up as a service
-
-Create a file `au.com.splinter.flare.plist` with the following contents:
-
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-        <dict>
-            <key>Label</key>
-            <string>au.com.splinter.flare</string>
-            <key>Program</key>
-            <string>/Users/XX/bin/flare</string>
-            <key>StartCalendarInterval</key>
-            <dict>
-                <key>Minute</key>
-                <integer>0</integer>
-            </dict>
-        </dict>
-    </plist>
-    
-This will make it sync every hour on the hour. You'll need to change the 'program' value above to match where you install the flare binary.
-Then: `cp au.com.splinter.flare.plist ~/Library/LaunchAgents`
-Then: `launchctl load ~/Library/LaunchAgents/au.com.splinter.flare.plist`
-Then: `launchctl start au.com.splinter.flare`
-
 ## License
 
 License is MIT, which means no liability is accepted. This is just a hobby project for me. You must treat this as experimental and don't use it for important files.
